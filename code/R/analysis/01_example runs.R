@@ -1,33 +1,30 @@
 library(prioritizr)
-setwd("D:/Work/IUCN/IUCN_processing")
 library(here)
 #library(SparseData)
 memory.limit(300000)
 
-pu <- raster(here("GADM/land.tif"))
-# pu_sutt <- raster(here("cost/sutt.tif"))
-# pu_HF <- raster(here("HF/HF09_iucn.tif"))
-wdpa <- raster(here("WDPA/wdpa_terrestrial.tif"))
+pu <- raster(here("data/intermediate/land.tif"))
+wdpa <- raster(here("data/intermediate/wdpa_terrestrial.tif"))
 locked_in <- ifelse(!is.na(wdpa[][!is.na(pu[])]), TRUE, FALSE)
 
 
-if( !file.exists("rij.rds")){
+if( !file.exists("data/intermediate/rij.rds")){
   
-  amph <- stack(list.files(here("IUCN/Amph/"), full.names = TRUE))
+  amph <- stack(list.files(here("data/raw/IUCN/Amph/"), full.names = TRUE))
   rij_amph <- rij_matrix(pu, amph)
-  saveRDS(rij_amph, here("rij_amph.rds"))
+  saveRDS(rij_amph, here("data/intermediate/rij_amph.rds"))
   
-  bird <- stack(list.files(here("IUCN/Bird/"), full.names = TRUE))
+  bird <- stack(list.files(here("data/raw/IUCN/Bird/"), full.names = TRUE))
   rij_bird <- rij_matrix(pu, bird)
-  saveRDS(rij_bird, here("rij_bird.rds"))
+  saveRDS(rij_bird, here("data/intermediate/rij_bird.rds"))
   
-  mamm <- stack(list.files(here("IUCN/Mamm/"), full.names = TRUE))
+  mamm <- stack(list.files(here("data/raw/IUCN/Mamm/"), full.names = TRUE))
   rij_mamm <- rij_matrix(pu, mamm)  
-  saveRDS(rij_mamm, here("rij_mamm.rds"))
+  saveRDS(rij_mamm, here("data/intermediate/rij_mamm.rds"))
   
-  rept <- stack(list.files(here("IUCN/Rept/"), full.names = TRUE))
+  rept <- stack(list.files(here("data/raw/IUCN/Rept/"), full.names = TRUE))
   rij_rept <- rij_matrix(pu, rept)
-  saveRDS(rij_rept, here("rij_rept.rds"))
+  saveRDS(rij_rept, here("data/intermediate/rij_rept.rds"))
   
   rij <- rbind(rij_amph, rij_bird, rij_mamm, rij_rept)
   
@@ -38,65 +35,13 @@ if( !file.exists("rij.rds")){
                      name = names(features),
                      stringsAsFactors = FALSE)
   
-  saveRDS(rij, here("rij.rds"))
-  saveRDS(spec, here("spec.rds"))
+  saveRDS(rij, here("data/intermediate/rij.rds"))
+  saveRDS(spec, here("data/intermediate/spec.rds"))
   
 } else {
-  rij <- readRDS("rij.rds")
-  spec <- readRDS("spec.rds")
+  rij <- readRDS("data/intermediate/rij.rds")
+  spec <- readRDS("data/intermediate/spec.rds")
 }
-
-
-p1 <- problem(pu[][!is.na(pu[])], features = spec, rij = rij,
-              run_checks = FALSE) %>%
-  add_min_set_objective() %>%
-  add_relative_targets(0.17) %>%
-  add_locked_in_constraints(locked_in) %>%
-  add_binary_decisions() #%>%
-# add_default_solver(gap = 0)
-
-system.time(s1 <- solve(p1, force = TRUE))
-
-
-
-rs1 <- pu
-rs1[][!is.na(rs1[])] <- s1
-plot(rs1)
-
-saveRDS(s1, here("output/s1.rds"))
-
-p2 <- p1 %>%
-  add_relative_targets(0.3)
-
-system.time(s2 <- solve(p2, force = TRUE))
-
-
-
-rs2 <- pu
-rs2[][!is.na(rs2[])] <- s2
-plot(rs2)
-saveRDS(s2, here("output/s2.rds"))
-
-
-
-#HF as cost
-p3 <- problem(pu_HF[][!is.na(pu[])], features = spec, rij = rij,
-              run_checks = FALSE) %>%
-  add_min_set_objective() %>%
-  add_relative_targets(0.17) %>%
-  add_locked_in_constraints(locked_in) %>%
-  add_binary_decisions() #%>%
-# add_default_solver(gap = 0)
-
-system.time(s3 <- solve(p3, force = TRUE))
-
-
-
-rs3 <- pu
-rs3[][!is.na(rs3[])] <- s3
-plot(rs3)
-
-saveRDS(s3, here("output/s3.rds"))
 
 
 ###
@@ -110,9 +55,9 @@ saveRDS(s3, here("output/s3.rds"))
 #for testing
 # rij <- rij_amph 
 
-wb_mean <- raster(here("WBD/wb_mean.tif"))
-ssp2 <- raster(here("Land_use/output/ssp2_year_50_threat_score.tif"))
-clim_grid_ann <- raster(here("Climate/probability-annual-iucn.tif"))
+wb_mean <- raster(here("data/intermediate/wb_mean.tif"))
+ssp2 <- raster(here("data/intermediate/ssp2_year_50_threat_score.tif"))
+clim_grid_ann <- raster(here("data/intermediate/probability-annual-iucn.tif"))
 
 ###
 # only keep values that are present in all 3 threat layers
