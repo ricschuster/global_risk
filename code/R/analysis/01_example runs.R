@@ -3,6 +3,10 @@ library(here)
 #library(SparseData)
 memory.limit(300000)
 
+## Define functions
+source(here("code/R/functions/multi-objective-prioritization.R"))
+
+
 pu <- raster(here("data/intermediate/land.tif"))
 wdpa <- raster(here("data/intermediate/wdpa_terrestrial.tif"))
 locked_in <- ifelse(!is.na(wdpa[][!is.na(pu[])]), TRUE, FALSE)
@@ -45,15 +49,15 @@ if( !file.exists("data/intermediate/rij.rds")){
 
 
 ###
-# rij_amph <- readRDS("rij_amph.rds")
-# rij_bird <- readRDS("rij_bird.rds")
-# rij_mamm <- readRDS("rij_mamm.rds")
-# rij_rept <- readRDS("rij_rept.rds")
+ rij_amph <- readRDS("data/intermediate/rij_amph.rds")
+# rij_bird <- readRDS("data/intermediate/rij_bird.rds")
+# rij_mamm <- readRDS("data/intermediate/rij_mamm.rds")
+# rij_rept <- readRDS("data/intermediate/rij_rept.rds")
 # 
 # rij <- rbind(rij_amph, rij_bird, rij_mamm, rij_rept)
 
 #for testing
-# rij <- rij_amph 
+ rij <- rij_amph 
 
 wb_mean <- raster(here("data/intermediate/wb_mean.tif"))
 ssp2 <- raster(here("data/intermediate/ssp2_year_50_threat_score.tif"))
