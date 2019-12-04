@@ -17,7 +17,7 @@ trm <- raster(here("data/raw/IUCN/richness_10km_Birds_v7_spp_edited_tax_extant_1
 base_raster <- raster(trm) 
 res(base_raster) <- sqrt(300) * 1000
 
-setwd("D:/Work/IUCN/Spatial_data")
+setwd("E:/Richard/IUCN/Spatial_data/")
 
 #####
 # Amphibians
@@ -42,7 +42,7 @@ for(ii in 1:nrow(amph_diss)){
   tmp_rast <- base_raster
   tmp_rast <- try(fasterize(amph_diss[ii,], tmp_rast))
   if(class(tmp_rast) == "RasterLayer" & !all(is.na(tmp_rast[]))){
-    writeRaster(tmp_rast, here("IUCN/Amph/",paste0(as.character(amph_diss[ii,]$binomial), "_", amph_diss[ii,]$seasonal, ".tif")),
+    writeRaster(tmp_rast, here("data/raw/IUCN/Amph/",paste0(as.character(amph_diss[ii,]$binomial), "_", amph_diss[ii,]$seasonal, ".tif")),
                 overwrite = TRUE)
   }
   rm(tmp_rast)
@@ -106,7 +106,7 @@ beepr::beep(3)
 ### End Jeff
 bird_diss <- st_as_sf(input_data10)
 
-saveRDS(bird_diss, here("bird_diss.rds"))
+saveRDS(bird_diss, here("data/raw/bird_diss_300km2.rds"))
 
 # bird_diss %<>% group_by(SCINAME) %>%
 #   summarise() %>% ungroup()
@@ -117,7 +117,7 @@ for(ii in 1:nrow(bird_diss)){
   tmp_rast <- base_raster
   tmp_rast <- try(fasterize(bird_diss[ii,], tmp_rast))
   if(class(tmp_rast) == "RasterLayer" & !all(is.na(tmp_rast[]))){
-    writeRaster(tmp_rast, here("IUCN/Bird/",paste0(as.character(bird_diss[ii,]$SCINAME), "_", bird_diss[ii,]$SEASONAL, ".tif")),
+    writeRaster(tmp_rast, here("data/raw/IUCN/Bird/",paste0(as.character(bird_diss[ii,]$SCINAME), "_", bird_diss[ii,]$SEASONAL, ".tif")),
                 overwrite = TRUE)
   }
   rm(tmp_rast)
@@ -147,7 +147,7 @@ for(ii in 1:nrow(mamm_diss)){
   tmp_rast <- base_raster
   tmp_rast <- try(fasterize(mamm_diss[ii,], tmp_rast))
   if(class(tmp_rast) == "RasterLayer" & !all(is.na(tmp_rast[]))){
-    writeRaster(tmp_rast, here("IUCN/Mamm/",paste0(as.character(mamm_diss[ii,]$binomial), "_", mamm_diss[ii,]$seasonal, ".tif")),
+    writeRaster(tmp_rast, here("data/raw/IUCN/Mamm/",paste0(as.character(mamm_diss[ii,]$binomial), "_", mamm_diss[ii,]$seasonal, ".tif")),
                 overwrite = TRUE)
   }
   rm(tmp_rast)
@@ -178,7 +178,7 @@ for(ii in 1:nrow(rept_diss)){
   tmp_rast <- base_raster
   tmp_rast <- try(fasterize(rept_diss[ii,], tmp_rast))
   if(class(tmp_rast) == "RasterLayer" & !all(is.na(tmp_rast[]))){
-    writeRaster(tmp_rast, here("IUCN/Rept/",paste0(as.character(rept_diss[ii,]$binomial), "_", rept_diss[ii,]$seasonal, ".tif")),
+    writeRaster(tmp_rast, here("data/raw/IUCN/Rept/",paste0(as.character(rept_diss[ii,]$binomial), "_", rept_diss[ii,]$seasonal, ".tif")),
                 overwrite = TRUE)
   }
   rm(tmp_rast)
@@ -236,6 +236,15 @@ writeRaster(clim_grid_ann, here("data/intermediate/probability-annual-iucn.tif")
 
 clim_grid_sd <- fasterize(clim_grid, base_raster, field = "prob_sd")
 writeRaster(clim_grid_sd, here("data/intermediate/probability-sd-iucn.tif"), overwrite = TRUE)
+
+
+#####
+# Climate Garcia
+#####
+vel_garc <- raster(here("data/raw/Climate/garcia/T/climate_change_velocity_T_cl1.tif")) %>% 
+  projectRaster(crs = proj4string(base_raster), method = "ngb") %>%
+  resample(base_raster, method = "ngb")
+writeRaster(vel_garc, here("data/intermediate/climate_vel_garc.tif"), overwrite = TRUE)
 
 
 #####

@@ -61,13 +61,13 @@ if( !file.exists("data/intermediate/rij.rds")){
 
 wb_mean <- raster(here("data/intermediate/wb_mean.tif"))
 ssp2 <- raster(here("data/intermediate/ssp2_year_50_threat_score.tif"))
-clim_grid_ann <- raster(here("data/intermediate/probability-annual-iucn.tif"))
-
+# clim_grid_ann <- raster(here("data/intermediate/probability-annual-iucn.tif"))
+clim_vel <- raster(here("data/intermediate/climate_vel_garc.tif"))
 ###
 # only keep values that are present in all 3 threat layers
 ###
 
-cdf <- as.data.frame(stack(pu, wb_mean, ssp2, clim_grid_ann))
+cdf <- as.data.frame(stack(pu, wb_mean, ssp2, clim_vel))
 cdf_red <- cdf[!is.na(cdf$land), ]
 keep <- !is.na(rowSums(cdf_red))
 
@@ -83,7 +83,7 @@ ssp2_val <- ssp2[][!is.na(pu[])]
 ssp2_val_red <- ssp2_val[keep]
 ssp2_val_red <- ssp2_val_red + 0.0001
 
-clim_val <- clim_grid_ann[][!is.na(pu[])]
+clim_val <- clim_vel[][!is.na(pu[])]
 clim_val_red <- clim_val[keep]
 
 locked_in_red <- locked_in[keep]
