@@ -6,7 +6,7 @@ library(raster)
 library(magrittr)
 library(wdpar)
 library(tidyverse)
-setwd("D:/Work/Papers/2019_global_risk/global_risk/")
+setwd("E:/Richard/global_risk/")
 library(here)
 
 ## Define functions
@@ -250,7 +250,7 @@ gadm_wb <- left_join(gadm, wb_mean, by = c("GID_0" = "Country.Code"))
 no_match <- gadm_wb %>% filter(is.na(MeanIndex))
 no_match_df <- no_match %>% st_set_geometry(NULL)
 
-write_csv(no_match_df, here("WBD/no_match_with_GADM.csv"))
+# write_csv(no_match_df, here("WBD/no_match_with_GADM.csv"))
 
 gadm_wb %<>% drop_na() %>% st_transform(crs = crs(base_raster))
 wb_mean <- fasterize(gadm_wb, base_raster, field = "MeanIndex")
