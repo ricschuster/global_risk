@@ -6,6 +6,7 @@ library(raster)
 library(magrittr)
 library(wdpar)
 library(tidyverse)
+setwd("D:/Work/Papers/2019_global_risk/global_risk/")
 library(here)
 
 ## Define functions
@@ -14,9 +15,9 @@ source(here("code/R/functions/geo.R"))
 
 trm <- raster(here("data/raw/IUCN/richness_10km_Birds_v7_spp_edited_tax_extant_1m_dense_EckertIV_1m_dissolved_Passeriformes_raster2.tif"))
 base_raster <- raster(trm) 
+res(base_raster) <- sqrt(300) * 1000
 
-
-setwd("D:\Work\IUCN\Spatial_data")
+setwd("D:/Work/IUCN/Spatial_data")
 
 #####
 # Amphibians
