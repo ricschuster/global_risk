@@ -1,4 +1,5 @@
 library(prioritizr)
+setwd("E:/Richard/global_risk/")
 library(here)
 #library(SparseData)
 # memory.limit(300000)
