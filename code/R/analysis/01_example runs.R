@@ -53,7 +53,7 @@ if( !file.exists("data/intermediate/rij.rds")){
  # rij_amph <- readRDS("data/intermediate/rij_amph.rds")
  # rij_bird <- readRDS("data/intermediate/rij_bird.rds")
  # rij_mamm <- readRDS("data/intermediate/rij_mamm.rds")
- rij_rept <- readRDS("data/intermediate/rij_rept.rds")
+ # rij_rept <- readRDS("data/intermediate/rij_rept.rds")
 # 
 # rij <- rbind(rij_amph, rij_bird, rij_mamm, rij_rept)
 
@@ -97,9 +97,9 @@ cost <- rbind(matrix(wb_val_red, nrow = 1),
 s1 <- multiobjective_prioritization(rij = rij_mat_use,
                                     obj = cost,
                                     pu_locked_in = locked_in_red,
-                                    relative_target = rep(0.30, nrow(rij)),
+                                    relative_target = rep(0.17, nrow(rij)),
                                     gap = rep(0.1, nrow(cost)),
-                                    threads = parallel::detectCores(TRUE) - 8)
+                                    threads = parallel::detectCores(TRUE) - 2)
 
 
 
