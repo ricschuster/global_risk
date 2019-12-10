@@ -15,7 +15,7 @@ source(here("code/R/functions/geo.R"))
 
 trm <- raster(here("data/raw/IUCN/richness_10km_Birds_v7_spp_edited_tax_extant_1m_dense_EckertIV_1m_dissolved_Passeriformes_raster2.tif"))
 base_raster <- raster(trm) 
-res(base_raster) <- sqrt(300) * 1000
+res(base_raster) <- sqrt(500) * 1000
 
 setwd("E:/Richard/IUCN/Spatial_data/")
 
@@ -61,7 +61,7 @@ for(ii in 1:nrow(amph_diss)){
 # #####
 
 if(!file.exists(here("data/raw/IUCN/bird_diss.rds"))){
-  setwd(basewd)
+  # setwd(basewd)
   
   setwd("BOTW/BOTW_Jeff/")
   
