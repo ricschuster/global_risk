@@ -99,7 +99,7 @@ s1 <- multiobjective_prioritization(rij = rij_mat_use,
                                     pu_locked_in = locked_in_red,
                                     relative_target = rep(0.17, nrow(rij)),
                                     gap = rep(0.1, nrow(cost)),
-                                    threads = parallel::detectCores(TRUE) - 2)
+                                    threads = 6)
 
 
 
