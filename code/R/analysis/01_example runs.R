@@ -114,3 +114,12 @@ rs1[][!is.na(pu[])] <- rs1_val
 
 plot(rs1)
 # plot(wdpa, add = TRUE)
+
+p1 <- problem(clim_val_red, spec, rij_mat_use)  %>%
+  add_min_set_objective() %>%
+  add_relative_targets(0.17) %>%
+  add_locked_in_constraints(locked_in_red) %>%
+  add_binary_decisions()
+
+system.time(s2 <- solve(p1))
+
