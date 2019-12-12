@@ -273,11 +273,13 @@ writeRaster(clim_grid_sd, here("data/intermediate/probability-sd-iucn.tif"), ove
 #####
 # Climate Garcia
 #####
-vel_garc <- raster(here("data/raw/Climate/garcia/T/climate_change_velocity_T_cl1.tif")) %>% 
-  projectRaster(crs = proj4string(base_raster), method = "ngb") %>%
-  resample(base_raster, method = "ngb")
-writeRaster(vel_garc, here("data/intermediate/climate_vel_garc.tif"), overwrite = TRUE)
+garc_P_stack <- list.files(here("data/raw/Climate/garcia/P"), full.names = TRUE) %>% stack() 
+garc_T_stack <- list.files(here("data/raw/Climate/garcia/T"), full.names = TRUE) %>% stack()
+gar_stack <- stack(garc_P_stack, garc_T_stack)
 
+gar_stack %>%   projectRaster(crs = proj4string(base_raster), method = "ngb") %>%
+  resample(base_raster, method = "ngb") %>%
+  writeRaster(here("data/intermediate/climate"), format = "GTiff", bylayer = TRUE, suffix = 'names')
 
 #####
 # World Bank

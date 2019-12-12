@@ -7,7 +7,7 @@ library(here)
 ## Define functions
 source(here("code/R/functions/multi-objective-prioritization.R"))
 
-data_resolution <- "500km2"
+data_resolution <- "100km2"
 
 pu <- raster(here("data/intermediate/", data_resolution, "land.tif"))
 wdpa <- raster(here("data/intermediate/", data_resolution, "wdpa_terrestrial.tif"))
