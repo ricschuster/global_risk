@@ -118,7 +118,8 @@ multiobjective_prioritization <- function(rij, obj, pu_locked_in,
   absolute_target <- rowSums(rij) * relative_target
   ## set gurobi parameters
   params <- list(Presolve = 2,
-                 Threads = threads)
+                 Threads = threads,
+                 MIPGap = 0.1)
   ## build gurobi model object
   model <- list()
   model$modelsense <- "min"

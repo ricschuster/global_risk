@@ -7,7 +7,7 @@ library(here)
 ## Define functions
 source(here("code/R/functions/multi-objective-prioritization.R"))
 
-data_resolution <- "300km2"
+data_resolution <- "500km2"
 
 pu <- raster(here("data/intermediate/", data_resolution, "land.tif"))
 wdpa <- raster(here("data/intermediate/", data_resolution, "wdpa_terrestrial.tif"))
@@ -95,12 +95,14 @@ cost <- rbind(matrix(wb_val_red, nrow = 1),
               matrix(clim_val_red, nrow = 1)
 )
 
-s1 <- multiobjective_prioritization(rij = rij_mat_use,
+system.time(
+  s1 <- multiobjective_prioritization(rij = rij_mat_use,
                                     obj = cost,
                                     pu_locked_in = locked_in_red,
                                     relative_target = rep(0.17, nrow(rij)),
                                     gap = rep(0.1, nrow(cost)),
-                                    threads = 6)
+                                    threads = parallel::detectCores() - 1)
+)
 
 
 
