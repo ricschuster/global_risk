@@ -50,15 +50,15 @@ if( !file.exists("data/intermediate/rij.rds")){
 
 
 ###
- # rij_amph <- readRDS("data/intermediate/rij_amph.rds")
- # rij_bird <- readRDS("data/intermediate/rij_bird.rds")
- # rij_mamm <- readRDS("data/intermediate/rij_mamm.rds")
- # rij_rept <- readRDS("data/intermediate/rij_rept.rds")
+# rij_amph <- readRDS("data/intermediate/rij_amph.rds")
+# rij_bird <- readRDS("data/intermediate/rij_bird.rds")
+# rij_mamm <- readRDS("data/intermediate/rij_mamm.rds")
+# rij_rept <- readRDS("data/intermediate/rij_rept.rds")
 # 
 # rij <- rbind(rij_amph, rij_bird, rij_mamm, rij_rept)
 
 #for testing
- # rij <- rij_amph 
+ # rij <- rij_bird
 
 wb_mean <- raster(here("data/intermediate/wb_mean.tif"))
 ssp2 <- raster(here("data/intermediate/ssp2_year_50_threat_score.tif"))
@@ -99,7 +99,7 @@ s1 <- multiobjective_prioritization(rij = rij_mat_use,
                                     pu_locked_in = locked_in_red,
                                     relative_target = rep(0.17, nrow(rij)),
                                     gap = rep(0.1, nrow(cost)),
-                                    threads = parallel::detectCores(TRUE) - 2)
+                                    threads = parallel::detectCores(TRUE) - 3)
 
 
 
