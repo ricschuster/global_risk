@@ -7,7 +7,7 @@ library(here)
 ## Define functions
 source(here("code/R/functions/multi-objective-prioritization.R"))
 
-data_resolution <- "100km2"
+data_resolution <- "500km2"
 
 pu <- raster(here("data/intermediate/", data_resolution, "land.tif"))
 wdpa <- raster(here("data/intermediate/", data_resolution, "wdpa_terrestrial.tif"))
@@ -64,7 +64,7 @@ if( !file.exists(paste0("data/intermediate/", data_resolution, "/rij.rds"))){
 wb_mean <- raster(here("data/intermediate/", data_resolution, "wb_mean.tif"))
 ssp2 <- raster(here("data/intermediate/", data_resolution, "ssp2_year_50_threat_score.tif"))
 # clim_grid_ann <- raster(here("data/intermediate/", data_resolution, "probability-annual-iucn.tif"))
-clim_vel <- raster(here("data/intermediate/", data_resolution, "climate_vel_garc.tif"))
+clim_vel <- raster(here("data/intermediate/", data_resolution, "climate_climate_change_velocity_T_cl1.tif"))
 ###
 # only keep values that are present in all 3 threat layers
 ###
@@ -95,14 +95,54 @@ cost <- rbind(matrix(wb_val_red, nrow = 1),
               matrix(clim_val_red, nrow = 1)
 )
 
-system.time(
-  s1 <- multiobjective_prioritization(rij = rij_mat_use,
-                                    obj = cost,
-                                    pu_locked_in = locked_in_red,
-                                    relative_target = rep(0.17, nrow(rij)),
-                                    gap = rep(0.1, nrow(cost)),
-                                    threads = parallel::detectCores() - 1)
-)
+#area = cost
+s000 <- multiobjective_prioritization(rij = rij_mat_use,
+                                      obj = rep(1, ncol(cost)),
+                                      pu_locked_in = locked_in_red,
+                                      relative_target = rep(0.30, nrow(rij)),
+                                      gap = 0.1,
+                                      threads = parallel::detectCores() - 1)
+saveRDS(s000, here("data/final/", data_resolution, "s000.rds"))
+
+#wb, lu, cl
+s111 <- multiobjective_prioritization(rij = rij_mat_use,
+                                      obj = cost,
+                                      pu_locked_in = locked_in_red,
+                                      relative_target = rep(0.30, nrow(rij)),
+                                      gap = rep(0.1, nrow(cost)),
+                                      threads = parallel::detectCores() - 1)
+saveRDS(s111, here("data/final/", data_resolution, "s111.rds"))
+
+
+#wb
+s100 <- multiobjective_prioritization(rij = rij_mat_use,
+                                      obj = cost[1,],
+                                      pu_locked_in = locked_in_red,
+                                      relative_target = rep(0.30, nrow(rij)),
+                                      gap = 0.1,
+                                      threads = parallel::detectCores() - 1)
+saveRDS(s100, here("data/final/", data_resolution, "s100.rds"))
+
+
+#lu
+s010 <- multiobjective_prioritization(rij = rij_mat_use,
+                                      obj = cost[2,],
+                                      pu_locked_in = locked_in_red,
+                                      relative_target = rep(0.30, nrow(rij)),
+                                      gap = 0.1,
+                                      threads = parallel::detectCores() - 1)
+saveRDS(s010, here("data/final/", data_resolution, "s010.rds"))
+
+
+
+#cl
+s001 <- multiobjective_prioritization(rij = rij_mat_use,
+                                      obj = cost[3,],
+                                      pu_locked_in = locked_in_red,
+                                      relative_target = rep(0.30, nrow(rij)),
+                                      gap = 0.1,
+                                      threads = parallel::detectCores() - 1)
+saveRDS(s001, here("data/final/", data_resolution, "s001.rds"))
 
 
 
