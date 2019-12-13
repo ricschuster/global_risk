@@ -59,7 +59,7 @@ if( !file.exists(paste0("data/intermediate/", data_resolution, "/rij.rds"))){
 # rij <- rbind(rij_amph, rij_bird, rij_mamm, rij_rept)
 
 #for testing
- # rij <- rij_amph 
+ # rij <- rij_bird
 
 wb_mean <- raster(here("data/intermediate/", data_resolution, "wb_mean.tif"))
 ssp2 <- raster(here("data/intermediate/", data_resolution, "ssp2_year_50_threat_score.tif"))
