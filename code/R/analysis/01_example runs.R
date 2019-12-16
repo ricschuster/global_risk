@@ -7,7 +7,7 @@ library(here)
 ## Define functions
 source(here("code/R/functions/multi-objective-prioritization.R"))
 
-data_resolution <- "500km2"
+data_resolution <- "300km2"
 
 pu <- raster(here("data/intermediate/", data_resolution, "land.tif"))
 wdpa <- raster(here("data/intermediate/", data_resolution, "wdpa_terrestrial.tif"))
@@ -176,21 +176,21 @@ saveRDS(s011, here("data/final/", data_resolution, "s011.rds"))
 
 
 
-rs1 <- raster(pu)
-rs1_val <- rs1[][!is.na(pu[])]
-rs1_val_red <- rs1_val[keep]
-rs1_val_red <- s1$solution
-rs1_val[keep] <- rs1_val_red
-rs1[][!is.na(pu[])] <- rs1_val
-
-plot(rs1)
-# plot(wdpa, add = TRUE)
-
-p1 <- problem(clim_val_red, spec, rij_mat_use)  %>%
-  add_min_set_objective() %>%
-  add_relative_targets(0.17) %>%
-  add_locked_in_constraints(locked_in_red) %>%
-  add_binary_decisions()
-
-system.time(s2 <- solve(p1))
+# rs1 <- raster(pu)
+# rs1_val <- rs1[][!is.na(pu[])]
+# rs1_val_red <- rs1_val[keep]
+# rs1_val_red <- s1$solution
+# rs1_val[keep] <- rs1_val_red
+# rs1[][!is.na(pu[])] <- rs1_val
+# 
+# plot(rs1)
+# # plot(wdpa, add = TRUE)
+# 
+# p1 <- problem(clim_val_red, spec, rij_mat_use)  %>%
+#   add_min_set_objective() %>%
+#   add_relative_targets(0.17) %>%
+#   add_locked_in_constraints(locked_in_red) %>%
+#   add_binary_decisions()
+# 
+# system.time(s2 <- solve(p1))
 
