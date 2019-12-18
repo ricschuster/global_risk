@@ -95,23 +95,25 @@ cost <- rbind(matrix(wb_val_red, nrow = 1),
               matrix(clim_val_red, nrow = 1)
 )
 
+gap <- 0.01
+
 #area = cost
 s000 <- multiobjective_prioritization(rij = rij_mat_use,
                                       obj = rep(1, ncol(cost)),
                                       pu_locked_in = locked_in_red,
                                       relative_target = rep(0.30, nrow(rij)),
-                                      gap = 0.1,
+                                      gap = gap,
                                       threads = parallel::detectCores() - 1)
-saveRDS(s000, here("data/final/", data_resolution, "s000.rds"))
+saveRDS(s000, here("data/final/", data_resolution, paste0("s000_gap_", gap, ".rds")))
 
 #wb, lu, cl
 s111 <- multiobjective_prioritization(rij = rij_mat_use,
                                       obj = cost,
                                       pu_locked_in = locked_in_red,
                                       relative_target = rep(0.30, nrow(rij)),
-                                      gap = rep(0.1, nrow(cost)),
+                                      gap = rep(gap, nrow(cost)),
                                       threads = parallel::detectCores() - 1)
-saveRDS(s111, here("data/final/", data_resolution, "s111.rds"))
+saveRDS(s111, here("data/final/", data_resolution, paste0("s111_gap_", gap, ".rds")))
 
 
 #wb
@@ -119,9 +121,9 @@ s100 <- multiobjective_prioritization(rij = rij_mat_use,
                                       obj = cost[1,],
                                       pu_locked_in = locked_in_red,
                                       relative_target = rep(0.30, nrow(rij)),
-                                      gap = 0.1,
+                                      gap = gap,
                                       threads = parallel::detectCores() - 1)
-saveRDS(s100, here("data/final/", data_resolution, "s100.rds"))
+saveRDS(s100, here("data/final/", data_resolution, paste0("s100_gap_", gap, ".rds")))
 
 
 #lu
@@ -129,9 +131,9 @@ s010 <- multiobjective_prioritization(rij = rij_mat_use,
                                       obj = cost[2,],
                                       pu_locked_in = locked_in_red,
                                       relative_target = rep(0.30, nrow(rij)),
-                                      gap = 0.1,
+                                      gap = gap,
                                       threads = parallel::detectCores() - 1)
-saveRDS(s010, here("data/final/", data_resolution, "s010.rds"))
+saveRDS(s010, here("data/final/", data_resolution, paste0("s010_gap_", gap, ".rds")))
 
 
 
@@ -140,9 +142,9 @@ s001 <- multiobjective_prioritization(rij = rij_mat_use,
                                       obj = cost[3,],
                                       pu_locked_in = locked_in_red,
                                       relative_target = rep(0.30, nrow(rij)),
-                                      gap = 0.1,
+                                      gap = gap,
                                       threads = parallel::detectCores() - 1)
-saveRDS(s001, here("data/final/", data_resolution, "s001.rds"))
+saveRDS(s001, here("data/final/", data_resolution, paste0("s001_gap_", gap, ".rds")))
 
 
 #wb, lu
@@ -150,9 +152,9 @@ s110 <- multiobjective_prioritization(rij = rij_mat_use,
                                       obj = cost[1:2,],
                                       pu_locked_in = locked_in_red,
                                       relative_target = rep(0.30, nrow(rij)),
-                                      gap = c(0.1,0.1),
+                                      gap = c(gap, gap),
                                       threads = parallel::detectCores() - 1)
-saveRDS(s110, here("data/final/", data_resolution, "s110.rds"))
+saveRDS(s110, here("data/final/", data_resolution, paste0("s110_gap_", gap, ".rds")))
 
 
 
@@ -161,18 +163,18 @@ s101 <- multiobjective_prioritization(rij = rij_mat_use,
                                       obj = cost[c(1,3),],
                                       pu_locked_in = locked_in_red,
                                       relative_target = rep(0.30, nrow(rij)),
-                                      gap = c(0.1,0.1),
+                                      gap = c(gap, gap),
                                       threads = parallel::detectCores() - 1)
-saveRDS(s101, here("data/final/", data_resolution, "s101.rds"))
+saveRDS(s101, here("data/final/", data_resolution, paste0("s101_gap_", gap, ".rds")))
 
 #lu, cl
 s011 <- multiobjective_prioritization(rij = rij_mat_use,
                                       obj = cost[c(2,3),],
                                       pu_locked_in = locked_in_red,
                                       relative_target = rep(0.30, nrow(rij)),
-                                      gap = c(0.1, 0.1),
+                                      gap = c(gap, gap),
                                       threads = parallel::detectCores() - 1)
-saveRDS(s011, here("data/final/", data_resolution, "s011.rds"))
+saveRDS(s011, here("data/final/", data_resolution, paste0("s011_gap_", gap, ".rds")))
 
 
 
