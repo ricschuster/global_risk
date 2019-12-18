@@ -12,6 +12,7 @@ data_resolution <- paste0(dr, "km2")
 
 pu <- raster(here("data/intermediate/", data_resolution, "land.tif"))
 wdpa <- raster(here("data/intermediate/", data_resolution, "wdpa_terrestrial.tif"))
+land <- raster(here("data/intermediate/", data_resolution, "land.tif"))
 
 wb_mean <- raster(here("data/intermediate/", data_resolution, "wb_mean.tif"))
 ssp2 <- raster(here("data/intermediate/", data_resolution, "ssp2_year_50_threat_score.tif"))
@@ -59,6 +60,14 @@ r_df <- as.data.frame(r_stack)
 prot <- sum(locked_in_red) * dr / 1000000
 (selected <- colSums(r_df, na.rm = TRUE) * dr /1000000)
 selected - prot
+
+(perc_tot <- round(selected/land_area * 100, 2))
+
+(perc_no_prot <- round((selected - prot)/land_area * 100, 2))
+
+(perc_increse <- perc_tot - prot/land_area*100)
+
+land_area <- sum(land[], na.rm = TRUE) * prod(res(land))/1000000 /1000000
 
 ss <- sum(r_stack)
 tt <-table(round(ss[],0))
