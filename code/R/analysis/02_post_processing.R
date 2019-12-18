@@ -4,6 +4,8 @@ library(here)
 #library(SparseData)
 # memory.limit(300000)
 library(raster)
+library(tidyverse)
+library(magrittr)
 
 ## Define functions
 source(here("code/R/functions/multi-objective-prioritization.R"))
@@ -30,7 +32,7 @@ locked_in <- ifelse(!is.na(wdpa[][!is.na(pu[])]), TRUE, FALSE)
 locked_in_red <- locked_in[keep]
 
 
-fls <- list.files(here("data/final/", data_resolution))
+fls <- list.files(here("data/final/", data_resolution), pattern = "*.rds")
 nms <- gsub(".rds", "", fls)
 
 rds_rast <- list()
@@ -81,3 +83,15 @@ writeRaster(r_stack, here("data/final/", data_resolution,"solution.tif"), bylaye
 ######
 # Summarise by land use type? (maybe using Scott's simplified categories)
 # summarise by country and report averages?
+
+gadm_df <- read_csv(here("data/intermediate/", data_resolution, "gadm_country_tbl.csv")) %>%
+  select(NAME_IDX, GID_0, NAME_0)
+
+gadm_country <- raster(here("data/intermediate/", data_resolution, "gadm_country.tif"))
+
+count_stack <- stack(gadm_country, r_stack)
+count_df <- as.data.frame(count_stack) %>% drop_na() 
+
+count_df %<>% left_join(gadm_df, by = c("gadm_country" = "NAME_IDX"))
+
+count_sum <- count_df %>% group_by(NAME_0) %>% summarise_at(1:9, list(sum = sum))
