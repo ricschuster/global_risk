@@ -83,7 +83,7 @@ wb_val_red <- (wb_val_red + min(wb_val_red)) * -1
 
 ssp2_val <- ssp2[][!is.na(pu[])]
 ssp2_val_red <- ssp2_val[keep]
-ssp2_val_red <- ssp2_val_red + 0.0001
+ssp2_val_red <- ssp2_val_red + 0.01
 
 clim_val <- clim_vel[][!is.na(pu[])]
 clim_val_red <- clim_val[keep]

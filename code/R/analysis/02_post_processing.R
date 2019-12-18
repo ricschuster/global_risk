@@ -1,18 +1,17 @@
 library(prioritizr)
-setwd("E:/Richard/global_risk/")
+setwd("D:/Work/Papers/2019_global_risk/global_risk/")
 library(here)
 #library(SparseData)
 # memory.limit(300000)
+library(raster)
 
 ## Define functions
 source(here("code/R/functions/multi-objective-prioritization.R"))
-
-data_resolution <- "300km2"
+dr <- 100
+data_resolution <- paste0(dr, "km2")
 
 pu <- raster(here("data/intermediate/", data_resolution, "land.tif"))
 wdpa <- raster(here("data/intermediate/", data_resolution, "wdpa_terrestrial.tif"))
-locked_in <- ifelse(!is.na(wdpa[][!is.na(pu[])]), TRUE, FALSE)
-locked_in_red <- locked_in[keep]
 
 wb_mean <- raster(here("data/intermediate/", data_resolution, "wb_mean.tif"))
 ssp2 <- raster(here("data/intermediate/", data_resolution, "ssp2_year_50_threat_score.tif"))
@@ -26,6 +25,8 @@ cdf <- as.data.frame(stack(pu, wb_mean, ssp2, clim_vel))
 cdf_red <- cdf[!is.na(cdf$land), ]
 keep <- !is.na(rowSums(cdf_red))
 
+locked_in <- ifelse(!is.na(wdpa[][!is.na(pu[])]), TRUE, FALSE)
+locked_in_red <- locked_in[keep]
 
 
 fls <- list.files(here("data/final/", data_resolution))
@@ -55,12 +56,14 @@ r_stack <- stack(rds_rast)
 
 r_df <- as.data.frame(r_stack)
 
-prot <- sum(locked_in_red) * 300 / 1000000
-(selected <- colSums(r_df, na.rm = TRUE) * 300 /1000000)
+prot <- sum(locked_in_red) * dr / 1000000
+(selected <- colSums(r_df, na.rm = TRUE) * dr /1000000)
 selected - prot
 
 ss <- sum(r_stack)
-tt <-table(ss[])
+tt <-table(round(ss[],0))
 tt[10] <- tt[9] - sum(locked_in_red)
 names(tt)[10] <- "8-prot"
 tt
+
+writeRaster(r_stack, here("data/final/", data_resolution,"solution.tif"), bylayer = TRUE, suffix = 'names')
