@@ -1,0 +1,66 @@
+library(prioritizr)
+setwd("E:/Richard/global_risk/")
+library(here)
+#library(SparseData)
+# memory.limit(300000)
+
+## Define functions
+source(here("code/R/functions/multi-objective-prioritization.R"))
+
+data_resolution <- "300km2"
+
+pu <- raster(here("data/intermediate/", data_resolution, "land.tif"))
+wdpa <- raster(here("data/intermediate/", data_resolution, "wdpa_terrestrial.tif"))
+locked_in <- ifelse(!is.na(wdpa[][!is.na(pu[])]), TRUE, FALSE)
+locked_in_red <- locked_in[keep]
+
+wb_mean <- raster(here("data/intermediate/", data_resolution, "wb_mean.tif"))
+ssp2 <- raster(here("data/intermediate/", data_resolution, "ssp2_year_50_threat_score.tif"))
+# clim_grid_ann <- raster(here("data/intermediate/", data_resolution, "probability-annual-iucn.tif"))
+clim_vel <- raster(here("data/intermediate/", data_resolution, "climate_climate_change_velocity_T_cl1.tif"))
+###
+# only keep values that are present in all 3 threat layers
+###
+
+cdf <- as.data.frame(stack(pu, wb_mean, ssp2, clim_vel))
+cdf_red <- cdf[!is.na(cdf$land), ]
+keep <- !is.na(rowSums(cdf_red))
+
+
+
+fls <- list.files(here("data/final/", data_resolution))
+nms <- gsub(".rds", "", fls)
+
+rds_rast <- list()
+
+for(ii in 1:length(fls)){
+  
+  rs1 <- raster(pu)
+  rs1_val <- rs1[][!is.na(pu[])]
+  # rs1_val_red <- rs1_val[keep]
+
+  tmp_rds <- readRDS(here("data/final/", data_resolution, fls[ii]))
+  
+  rs1_val_red <- tmp_rds$solution
+  rs1_val[keep] <- rs1_val_red
+  rs1[][!is.na(pu[])] <- rs1_val
+  
+  rds_rast[[ii]] <- rs1 
+  names(rds_rast)[ii] <- nms[ii]
+  
+  rm(rs1, rs1_val, rs1_val_red, tmp_rds)
+}
+
+r_stack <- stack(rds_rast)
+
+r_df <- as.data.frame(r_stack)
+
+prot <- sum(locked_in_red) * 300 / 1000000
+(selected <- colSums(r_df, na.rm = TRUE) * 300 /1000000)
+selected - prot
+
+ss <- sum(r_stack)
+tt <-table(ss[])
+tt[10] <- tt[9] - sum(locked_in_red)
+names(tt)[10] <- "8-prot"
+tt
