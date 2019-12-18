@@ -76,3 +76,8 @@ names(tt)[10] <- "8-prot"
 tt
 
 writeRaster(r_stack, here("data/final/", data_resolution,"solution.tif"), bylayer = TRUE, suffix = 'names')
+
+
+######
+# Summarise by land use type? (maybe using Scott's simplified categories)
+# summarise by country and report averages?
