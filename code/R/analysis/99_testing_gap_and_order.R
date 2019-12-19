@@ -1,6 +1,7 @@
 library(raster)
 library(tidyverse)
 library(magrittr)
+library(foreach)
 library(prioritizr)
 # setwd("E:/Richard/global_risk/")
 setwd("D:/Work/Papers/2019_global_risk/global_risk/")
@@ -138,7 +139,7 @@ runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %do% {
                                         threads = parallel::detectCores() - 1)
 
   # save solution
-  str_glue_data(r, "run-", run,
+  str_glue_data(r, "rds_run-", run,
                 "_gap-{gap}_flip_priority-{flip_priority}_s-{wb}{lu}{cl}.rds") %>%
     file.path(runs_dir, .) %>%
     saveRDS(r, .)
@@ -150,7 +151,7 @@ runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %do% {
   rs1_val[keep] <- rs1_val_red
   rs1[][!is.na(pu[])] <- rs1_val
   
-  str_glue_data(r, "run-", run,
+  str_glue_data(r, "solution_run-", run,
                 "_gap-{gap}_flip_priority-{flip_priority}_s-{wb}{lu}{cl}.tif") %>% 
     file.path(runs_dir, .) %>% 
     writeRaster(rs1, .)
