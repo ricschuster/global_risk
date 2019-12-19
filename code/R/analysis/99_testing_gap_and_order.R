@@ -3,8 +3,8 @@ library(tidyverse)
 library(magrittr)
 library(foreach)
 library(prioritizr)
-# setwd("E:/Richard/global_risk/")
-setwd("D:/Work/Papers/2019_global_risk/global_risk/")
+setwd("E:/Richard/global_risk/")
+# setwd("D:/Work/Papers/2019_global_risk/global_risk/")
 library(here)
 #library(SparseData)
 # memory.limit(300000)
@@ -12,7 +12,7 @@ library(here)
 ## Define functions
 source(here("code/R/functions/multi-objective-prioritization.R"))
 
-dr <- 500
+dr <- 300
 data_resolution <- paste0(dr, "km2")
 
 pu <- raster(here("data/intermediate/", data_resolution, "land.tif"))
@@ -20,44 +20,44 @@ wdpa <- raster(here("data/intermediate/", data_resolution, "wdpa_terrestrial.tif
 locked_in <- ifelse(!is.na(wdpa[][!is.na(pu[])]), TRUE, FALSE)
 
 
-# if( !file.exists(paste0("data/intermediate/", data_resolution, "/rij.rds"))){
-#   
-#   amph <- stack(list.files(here("data/raw/IUCN/Amph/"), full.names = TRUE))
-#   rij_amph <- rij_matrix(pu, amph)
-#   saveRDS(rij_amph, here("data/intermediate/", data_resolution, "rij_amph.rds"))
-#   
-#   bird <- stack(list.files(here("data/raw/IUCN/Bird/"), full.names = TRUE))
-#   rij_bird <- rij_matrix(pu, bird)
-#   saveRDS(rij_bird, here("data/intermediate/", data_resolution, "rij_bird.rds"))
-#   
-#   mamm <- stack(list.files(here("data/raw/IUCN/Mamm/"), full.names = TRUE))
-#   rij_mamm <- rij_matrix(pu, mamm)  
-#   saveRDS(rij_mamm, here("data/intermediate/", data_resolution, "rij_mamm.rds"))
-#   
-#   rept <- stack(list.files(here("data/raw/IUCN/Rept/"), full.names = TRUE))
-#   rij_rept <- rij_matrix(pu, rept)
-#   saveRDS(rij_rept, here("data/intermediate/", data_resolution, "rij_rept.rds"))
-#   
-#   rij <- rbind(rij_amph, rij_bird, rij_mamm, rij_rept)
-#   
-#   features <- stack(amph, bird, mamm, rept)
-#   
-#   
-#   spec <- data.frame(id = 1:nlayers(features),
-#                      name = names(features),
-#                      stringsAsFactors = FALSE)
-#   
-#   saveRDS(rij, here("data/intermediate/", data_resolution, "rij.rds"))
-#   saveRDS(spec, here("data/intermediate/", data_resolution, "spec.rds"))
-#   
-# } else {
-#   rij <- readRDS(here("data/intermediate/", data_resolution, "rij.rds"))
-#   spec <- readRDS(here("data/intermediate/", data_resolution, "spec.rds"))
-# }
+if( !file.exists(paste0("data/intermediate/", data_resolution, "/rij.rds"))){
+
+  amph <- stack(list.files(here("data/raw/IUCN/Amph/"), full.names = TRUE))
+  rij_amph <- rij_matrix(pu, amph)
+  saveRDS(rij_amph, here("data/intermediate/", data_resolution, "rij_amph.rds"))
+
+  bird <- stack(list.files(here("data/raw/IUCN/Bird/"), full.names = TRUE))
+  rij_bird <- rij_matrix(pu, bird)
+  saveRDS(rij_bird, here("data/intermediate/", data_resolution, "rij_bird.rds"))
+
+  mamm <- stack(list.files(here("data/raw/IUCN/Mamm/"), full.names = TRUE))
+  rij_mamm <- rij_matrix(pu, mamm)
+  saveRDS(rij_mamm, here("data/intermediate/", data_resolution, "rij_mamm.rds"))
+
+  rept <- stack(list.files(here("data/raw/IUCN/Rept/"), full.names = TRUE))
+  rij_rept <- rij_matrix(pu, rept)
+  saveRDS(rij_rept, here("data/intermediate/", data_resolution, "rij_rept.rds"))
+
+  rij <- rbind(rij_amph, rij_bird, rij_mamm, rij_rept)
+
+  features <- stack(amph, bird, mamm, rept)
+
+
+  spec <- data.frame(id = 1:nlayers(features),
+                     name = names(features),
+                     stringsAsFactors = FALSE)
+
+  saveRDS(rij, here("data/intermediate/", data_resolution, "rij.rds"))
+  saveRDS(spec, here("data/intermediate/", data_resolution, "spec.rds"))
+
+} else {
+  rij <- readRDS(here("data/intermediate/", data_resolution, "rij.rds"))
+  spec <- readRDS(here("data/intermediate/", data_resolution, "spec.rds"))
+}
 
 
 ###
-rij_amph <- readRDS(here("data/intermediate/", data_resolution, "rij_amph.rds"))
+# rij_amph <- readRDS(here("data/intermediate/", data_resolution, "rij_amph.rds"))
 # rij_bird <- readRDS(here("data/intermediate/", data_resolution, "rij_bird.rds"))
 # rij_mamm <- readRDS(here("data/intermediate/", data_resolution, "rij_mamm.rds"))
 # rij_rept <- readRDS(here("data/intermediate/", data_resolution, "rij_rept.rds"))
@@ -65,7 +65,7 @@ rij_amph <- readRDS(here("data/intermediate/", data_resolution, "rij_amph.rds"))
 # rij <- rbind(rij_amph, rij_bird, rij_mamm, rij_rept)
 
 #for testing
-rij <- rij_amph
+# rij <- rij_amph
 
 wb_mean <- raster(here("data/intermediate/", data_resolution, "wb_mean.tif"))
 ssp2 <- raster(here("data/intermediate/", data_resolution, "ssp2_year_50_threat_score.tif"))
@@ -107,9 +107,9 @@ runs <- expand.grid(wb = 0:1,
                     lu = 0:1,
                     cl = 0:1,
                     flip_priority = c(FALSE, TRUE),
-                    gap = c(0.01, 0.05, 0.1))
+                    gap = 0.01)
 
-runs_dir <- here("data", "temp", data_resolution)
+runs_dir <- here("data", "final", data_resolution)
 # gap <- 0.1
 # 
 # flip_priority <- FALSE
@@ -170,8 +170,8 @@ land <- raster(here("data/intermediate/", data_resolution, "land.tif"))
 land_area <- sum(land[], na.rm = TRUE) * prod(res(land))/1000000 /1000000
 
 
-fls <- list.files(here("data/temp/", data_resolution), pattern = "*.tif$", full.names = TRUE)
-nms <- gsub(".tif", "", fls) %>% gsub(here("data/temp/", data_resolution,"solution_"), "", .)
+fls <- list.files(here("data/final/", data_resolution), pattern = "*.tif$", full.names = TRUE)
+nms <- gsub(".tif", "", fls) %>% gsub(here("data/final/", data_resolution,"solution_"), "", .)
 
 
 r_stack <- stack(fls)
@@ -196,7 +196,7 @@ selected - prot
 # names(tt)[10] <- "8-prot"
 # tt
 # 
-# writeRaster(r_stack, here("data/temp/", data_resolution,"solution.tif"), bylayer = TRUE, suffix = 'names')
+# writeRaster(r_stack, here("data/final/", data_resolution,"solution.tif"), bylayer = TRUE, suffix = 'names')
 
 
 ######
@@ -216,4 +216,4 @@ count_df %<>% left_join(gadm_df, by = c("gadm_country" = "NAME_IDX"))
 count_sum <- count_df %>% group_by(NAME_0)  %>% summarise_at(2:(ncol(count_df)-2), list(sum = sum))
 # %>% tally()
 
-count_sum %>% write_csv(here("data/temp/", data_resolution, "country_summaries.csv"))
+count_sum %>% write_csv(here("data/final/", data_resolution, "country_summaries.csv"))

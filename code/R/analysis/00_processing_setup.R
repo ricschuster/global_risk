@@ -12,7 +12,7 @@ library(here)
 ## Define functions
 source(here("code/R/functions/geo.R"))
 
-dr <- 500
+dr <- 300
 data_resolution <- paste0(dr, "km2")
 
 trm <- raster(here("data/raw/IUCN/richness_10km_Birds_v7_spp_edited_tax_extant_1m_dense_EckertIV_1m_dissolved_Passeriformes_raster2.tif"))
