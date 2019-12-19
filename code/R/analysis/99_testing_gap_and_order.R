@@ -106,8 +106,8 @@ cost <- rbind(matrix(wb_val_red, nrow = 1),
 runs <- expand.grid(wb = 0:1,
                     lu = 0:1,
                     cl = 0:1,
-                    gap = c(0.01, 0.05, 0.1),
-                    flip_priority = c(FALSE, TRUE))
+                    flip_priority = c(FALSE, TRUE),
+                    gap = c(0.01, 0.05, 0.1))
 
 runs_dir <- here("data", "temp", data_resolution)
 # gap <- 0.1
@@ -125,7 +125,7 @@ runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %do% {
     gap_temp <- r$gap
     
   } else {
-    cost_temp <- cost[c(r$wb, r$lu, r$cl),]
+    cost_temp <- cost[c(r$wb, r$lu * 2, r$cl * 3),]
     gap_temp <- rep(r$gap, sum(c(r$wb, r$lu, r$cl)))
   }
   
@@ -139,7 +139,7 @@ runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %do% {
                                         threads = parallel::detectCores() - 1)
 
   # save solution
-  str_glue_data(r, "rds_run-", run,
+  str_glue_data(r, "rds_run-", sprintf("%03d", run),
                 "_gap-{gap}_flip_priority-{flip_priority}_s-{wb}{lu}{cl}.rds") %>%
     file.path(runs_dir, .) %>%
     saveRDS(r, .)
@@ -151,12 +151,13 @@ runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %do% {
   rs1_val[keep] <- rs1_val_red
   rs1[][!is.na(pu[])] <- rs1_val
   
-  str_glue_data(r, "solution_run-", run,
+  str_glue_data(r, "solution_run-", sprintf("%03d", run),
                 "_gap-{gap}_flip_priority-{flip_priority}_s-{wb}{lu}{cl}.tif") %>% 
     file.path(runs_dir, .) %>% 
     writeRaster(rs1, .)
   
   rm(cost_temp, gap_temp, s_gur, rs1)
+  r
   
 }
 
@@ -169,30 +170,12 @@ land <- raster(here("data/intermediate/", data_resolution, "land.tif"))
 land_area <- sum(land[], na.rm = TRUE) * prod(res(land))/1000000 /1000000
 
 
-fls <- list.files(here("data/temp/", data_resolution), pattern = "*.rds")
-nms <- gsub(".rds", "", fls)
+fls <- list.files(here("data/temp/", data_resolution), pattern = "*.tif$", full.names = TRUE)
+nms <- gsub(".tif", "", fls) %>% gsub(here("data/temp/", data_resolution,"solution_"), "", .)
 
-rds_rast <- list()
 
-for(ii in 1:length(fls)){
-  
-  rs1 <- raster(pu)
-  rs1_val <- rs1[][!is.na(pu[])]
-  # rs1_val_red <- rs1_val[keep]
-  
-  tmp_rds <- readRDS(here("data/temp/", data_resolution, fls[ii]))
-  
-  rs1_val_red <- tmp_rds$solution
-  rs1_val[keep] <- rs1_val_red
-  rs1[][!is.na(pu[])] <- rs1_val
-  
-  rds_rast[[ii]] <- rs1 
-  names(rds_rast)[ii] <- nms[ii]
-  
-  rm(rs1, rs1_val, rs1_val_red, tmp_rds)
-}
-
-r_stack <- stack(rds_rast)
+r_stack <- stack(fls)
+names(r_stack) <- nms
 
 r_df <- as.data.frame(r_stack)
 
@@ -207,13 +190,13 @@ selected - prot
 (perc_increse <- perc_tot - prot/land_area*100)
 
 
-ss <- sum(r_stack)
-tt <-table(round(ss[],0))
-tt[10] <- tt[9] - sum(locked_in_red)
-names(tt)[10] <- "8-prot"
-tt
-
-writeRaster(r_stack, here("data/temp/", data_resolution,"solution.tif"), bylayer = TRUE, suffix = 'names')
+# ss <- sum(r_stack)
+# tt <-table(round(ss[],0))
+# tt[10] <- tt[9] - sum(locked_in_red)
+# names(tt)[10] <- "8-prot"
+# tt
+# 
+# writeRaster(r_stack, here("data/temp/", data_resolution,"solution.tif"), bylayer = TRUE, suffix = 'names')
 
 
 ######
@@ -230,7 +213,7 @@ count_df <- as.data.frame(count_stack) %>% drop_na()
 
 count_df %<>% left_join(gadm_df, by = c("gadm_country" = "NAME_IDX"))
 
-count_sum <- count_df %>% group_by(NAME_0)  %>% summarise_at(2:9, list(sum = sum))
+count_sum <- count_df %>% group_by(NAME_0)  %>% summarise_at(2:(ncol(count_df)-2), list(sum = sum))
 # %>% tally()
 
 count_sum %>% write_csv(here("data/temp/", data_resolution, "country_summaries.csv"))
