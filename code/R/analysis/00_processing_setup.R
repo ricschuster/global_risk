@@ -12,10 +12,12 @@ library(here)
 ## Define functions
 source(here("code/R/functions/geo.R"))
 
+dr <- 500
+data_resolution <- paste0(dr, "km2")
 
 trm <- raster(here("data/raw/IUCN/richness_10km_Birds_v7_spp_edited_tax_extant_1m_dense_EckertIV_1m_dissolved_Passeriformes_raster2.tif"))
 base_raster <- raster(trm) 
-res(base_raster) <- sqrt(500) * 1000
+res(base_raster) <- sqrt(dr) * 1000
 
 setwd("E:/Richard/IUCN/Spatial_data/")
 
@@ -225,7 +227,7 @@ gadm <- st_read(here("data/raw/GADM/gadm36_levels.gpkg"))
 gadm$land <- 1
 gadm %<>% st_transform(crs = crs(base_raster))
 land <- fasterize(gadm, base_raster, field = "land")
-writeRaster(land, here("data/intermediate/land.tif"), overwrite = TRUE)
+writeRaster(land, here("data/intermediate/", data_resolution, "land.tif"), overwrite = TRUE)
 
 #####
 # WDPA
@@ -238,9 +240,9 @@ wdpa$one <- 1
 wdpa_rast <- fasterize(wdpa, base_raster, field = "one")
 
 # remove marine
-land <- raster(here("data/intermediate/land.tif"))
+land <- raster(here("data/intermediate/", data_resolution, "land.tif"))
 wdpa_rast[] <- ifelse(!is.na(land[]), wdpa_rast[], NA)
-writeRaster(wdpa_rast, here("data/intermediate/wdpa_terrestrial.tif"), overwrite = TRUE)
+writeRaster(wdpa_rast, here("data/intermediate/", data_resolution, "wdpa_terrestrial.tif"), overwrite = TRUE)
 
 #####
 # Climate 
@@ -264,10 +266,10 @@ clim_grid %<>% drop_na() %>% st_transform(crs = crs(base_raster))
 
 # use fasterize  
 clim_grid_ann <- fasterize(clim_grid, base_raster, field = "prob_ann")
-writeRaster(clim_grid_ann, here("data/intermediate/probability-annual-iucn.tif"), overwrite = TRUE)
+writeRaster(clim_grid_ann, here("data/intermediate/", data_resolution, "probability-annual-iucn.tif"), overwrite = TRUE)
 
 clim_grid_sd <- fasterize(clim_grid, base_raster, field = "prob_sd")
-writeRaster(clim_grid_sd, here("data/intermediate/probability-sd-iucn.tif"), overwrite = TRUE)
+writeRaster(clim_grid_sd, here("data/intermediate/", data_resolution, "probability-sd-iucn.tif"), overwrite = TRUE)
 
 
 #####
@@ -279,7 +281,7 @@ gar_stack <- stack(garc_P_stack, garc_T_stack)
 
 gar_stack %>%   projectRaster(crs = proj4string(base_raster), method = "ngb") %>%
   resample(base_raster, method = "ngb") %>%
-  writeRaster(here("data/intermediate/climate"), format = "GTiff", bylayer = TRUE, suffix = 'names')
+  writeRaster(here("data/intermediate/", data_resolution, "climate"), format = "GTiff", bylayer = TRUE, suffix = 'names')
 
 #####
 # World Bank
@@ -296,11 +298,18 @@ no_match_df <- no_match %>% st_set_geometry(NULL)
 # write_csv(no_match_df, here("WBD/no_match_with_GADM.csv"))
 
 gadm_wb %<>% drop_na() %>% st_transform(crs = crs(base_raster))
+gadm_wb$NAME_IDX <- seq(1:nrow(gadm_wb))
+
+gadm_wb %>% st_set_geometry(NULL) %>% write_csv(here("data/intermediate/", data_resolution, "gadm_country_tbl.csv"))
+
+gadm_country <- fasterize(gadm_wb, base_raster, field = "NAME_IDX")
+writeRaster(gadm_country, here("data/intermediate/", data_resolution, "gadm_country.tif"), overwrite = TRUE)
+
 wb_mean <- fasterize(gadm_wb, base_raster, field = "MeanIndex")
-writeRaster(wb_mean, here("data/intermediate/wb_mean.tif"), overwrite = TRUE)
+writeRaster(wb_mean, here("data/intermediate/", data_resolution, "wb_mean.tif"), overwrite = TRUE)
 
 wb_sd <- fasterize(gadm_wb, base_raster, field = "SDIndex")
-writeRaster(wb_sd, here("data/intermediate/wb_sd.tif"), overwrite = TRUE)
+writeRaster(wb_sd, here("data/intermediate/", data_resolution, "wb_sd.tif"), overwrite = TRUE)
 
 #####
 # Land use
@@ -314,39 +323,39 @@ lu_base <- raster(here("data/raw/Land_use/SSPs_may2017/year_2000.asc"), crs = pr
   resample(base_raster, method = "ngb")
 lu_base_tib <- tibble(No = lu_base[]) %>% left_join(thrt_score, by = "No")
 lu_base[] <- lu_base_tib$threat_score
-writeRaster(lu_base, here("data/intermediate/year_2000_threat_score.tif"), overwrite = TRUE)
+writeRaster(lu_base, here("data/intermediate/", data_resolution, "year_2000_threat_score.tif"), overwrite = TRUE)
 
 ssp1 <- raster(here("data/raw/Land_use/SSPs_may2017/ssp1_year_50.asc"), crs = proj) %>% 
   projectRaster(crs = proj4string(base_raster), method = "ngb") %>%
   resample(base_raster, method = "ngb")
 ssp1_tib <- tibble(No = ssp1[]) %>% left_join(thrt_score, by = "No")
 ssp1[] <- ssp1_tib$threat_score
-writeRaster(ssp1, here("data/intermediate/ssp1_year_50_threat_score.tif"), overwrite = TRUE)
+writeRaster(ssp1, here("data/intermediate/", data_resolution, "ssp1_year_50_threat_score.tif"), overwrite = TRUE)
 
 ssp2 <- raster(here("data/raw/Land_use/SSPs_may2017/ssp2_year_50.asc"), crs = proj) %>%
   projectRaster(crs = proj4string(base_raster), method = "ngb") %>%
   resample(base_raster, method = "ngb")
 ssp2_tib <- tibble(No = ssp2[]) %>% left_join(thrt_score, by = "No")
 ssp2[] <- ssp2_tib$threat_score
-writeRaster(ssp2, here("data/intermediate/ssp2_year_50_threat_score.tif"), overwrite = TRUE)
+writeRaster(ssp2, here("data/intermediate/", data_resolution, "ssp2_year_50_threat_score.tif"), overwrite = TRUE)
 
 ssp3 <- raster(here("data/raw/Land_use/SSPs_may2017/ssp3_year_50.asc"), crs = proj) %>%
   projectRaster(crs = proj4string(base_raster), method = "ngb") %>%
   resample(base_raster, method = "ngb")
 ssp3_tib <- tibble(No = ssp3[]) %>% left_join(thrt_score, by = "No")
 ssp3[] <- ssp3_tib$threat_score
-writeRaster(ssp3, here("data/intermediate/ssp3_year_50_threat_score.tif"), overwrite = TRUE)
+writeRaster(ssp3, here("data/intermediate/", data_resolution, "ssp3_year_50_threat_score.tif"), overwrite = TRUE)
 
 
 a <- 1
 b <- 2
 
 ssp1_chng <- (a * lu_base + b * ssp1)/(a + b)
-writeRaster(ssp1_chng, here("data/intermediate/ssp1_chng_threat_score.tif"), overwrite = TRUE)
+writeRaster(ssp1_chng, here("data/intermediate/", data_resolution, "ssp1_chng_threat_score.tif"), overwrite = TRUE)
 
 ssp2_chng <- (a * lu_base + b * ssp2)/(a + b)
-writeRaster(ssp2_chng, here("data/intermediate/ssp2_chng_threat_score.tif"), overwrite = TRUE)
+writeRaster(ssp2_chng, here("data/intermediate/", data_resolution, "ssp2_chng_threat_score.tif"), overwrite = TRUE)
 
 ssp3_chng <- (a * lu_base + b * ssp3)/(a + b)
-writeRaster(ssp3_chng, here("data/intermediate/ssp3_chng_threat_score.tif"), overwrite = TRUE)
+writeRaster(ssp3_chng, here("data/intermediate/", data_resolution, "ssp3_chng_threat_score.tif"), overwrite = TRUE)
 

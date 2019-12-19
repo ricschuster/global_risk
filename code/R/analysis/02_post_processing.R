@@ -4,6 +4,8 @@ library(here)
 #library(SparseData)
 # memory.limit(300000)
 library(raster)
+library(tidyverse)
+library(magrittr)
 
 ## Define functions
 source(here("code/R/functions/multi-objective-prioritization.R"))
@@ -12,6 +14,7 @@ data_resolution <- paste0(dr, "km2")
 
 pu <- raster(here("data/intermediate/", data_resolution, "land.tif"))
 wdpa <- raster(here("data/intermediate/", data_resolution, "wdpa_terrestrial.tif"))
+land <- raster(here("data/intermediate/", data_resolution, "land.tif"))
 
 wb_mean <- raster(here("data/intermediate/", data_resolution, "wb_mean.tif"))
 ssp2 <- raster(here("data/intermediate/", data_resolution, "ssp2_year_50_threat_score.tif"))
@@ -29,7 +32,7 @@ locked_in <- ifelse(!is.na(wdpa[][!is.na(pu[])]), TRUE, FALSE)
 locked_in_red <- locked_in[keep]
 
 
-fls <- list.files(here("data/final/", data_resolution))
+fls <- list.files(here("data/final/", data_resolution), pattern = "*.rds")
 nms <- gsub(".rds", "", fls)
 
 rds_rast <- list()
@@ -60,6 +63,14 @@ prot <- sum(locked_in_red) * dr / 1000000
 (selected <- colSums(r_df, na.rm = TRUE) * dr /1000000)
 selected - prot
 
+(perc_tot <- round(selected/land_area * 100, 2))
+
+(perc_no_prot <- round((selected - prot)/land_area * 100, 2))
+
+(perc_increse <- perc_tot - prot/land_area*100)
+
+land_area <- sum(land[], na.rm = TRUE) * prod(res(land))/1000000 /1000000
+
 ss <- sum(r_stack)
 tt <-table(round(ss[],0))
 tt[10] <- tt[9] - sum(locked_in_red)
@@ -67,3 +78,23 @@ names(tt)[10] <- "8-prot"
 tt
 
 writeRaster(r_stack, here("data/final/", data_resolution,"solution.tif"), bylayer = TRUE, suffix = 'names')
+
+
+######
+# Summarise by land use type? (maybe using Scott's simplified categories)
+# summarise by country and report averages?
+
+gadm_df <- read_csv(here("data/intermediate/", data_resolution, "gadm_country_tbl.csv")) %>%
+  select(NAME_IDX, GID_0, NAME_0)
+
+gadm_country <- raster(here("data/intermediate/", data_resolution, "gadm_country.tif"))
+
+count_stack <- stack(gadm_country, r_stack)
+count_df <- as.data.frame(count_stack) %>% drop_na() 
+
+count_df %<>% left_join(gadm_df, by = c("gadm_country" = "NAME_IDX"))
+
+count_sum <- count_df %>% group_by(NAME_0)  %>% summarise_at(2:9, list(sum = sum))
+# %>% tally()
+
+count_sum %>% write_csv(here("data/final/", data_resolution, "country_summaries.csv"))
