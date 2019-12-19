@@ -37,6 +37,9 @@
 #'
 #' @param gap \code{numeric} number of vector object containing the
 #'   optimality gap(s).
+#'   
+#' @param flip_priority \code{logical} logical indicating whether the 
+#'   the priority order of the objectives should be reversed.
 #'
 #' @details
 #' This function requires the following R packages: assertthat, guorobi, and
@@ -93,7 +96,8 @@
 #'
 #' @export
 multiobjective_prioritization <- function(rij, obj, pu_locked_in,
-                                          relative_target, gap, threads = 1) {
+                                          relative_target, gap, flip_priority = FALSE,
+                                          threads = 1) {
   # assert arguments are valid
   assertthat::assert_that(
     inherits(rij, "dgCMatrix") || is.matrix(rij), nrow(rij) > 0, ncol(rij) > 0,
@@ -135,7 +139,7 @@ multiobjective_prioritization <- function(rij, obj, pu_locked_in,
   } else {
     ## if multi-objective problem then we need to add data for each objective
     model$multiobj <- lapply(seq_along(gap), function(i) {
-      list(objn = obj[i, ], priority = length(gap) + 1 - i, reltol = gap[i])
+      list(objn = obj[i, ], priority = length(gap) + 1 + ifelse(flip_priority, i, i * -1), reltol = gap[i])
     })
   }
   # main processing
