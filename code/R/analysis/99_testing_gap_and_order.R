@@ -2,6 +2,7 @@ library(raster)
 library(tidyverse)
 library(magrittr)
 library(foreach)
+library(doParallel)
 library(prioritizr)
 setwd("E:/Richard/global_risk/")
 # setwd("D:/Work/Papers/2019_global_risk/global_risk/")
@@ -11,8 +12,12 @@ library(here)
 
 ## Define functions
 source(here("code/R/functions/multi-objective-prioritization.R"))
+# parallelization
+# n_cores <- 2
+# cl <- makeCluster(n_cores)
+# registerDoParallel(cl)
 
-dr <- 300
+dr <- 100
 data_resolution <- paste0(dr, "km2")
 
 pu <- raster(here("data/intermediate/", data_resolution, "land.tif"))
@@ -68,7 +73,7 @@ if( !file.exists(paste0("data/intermediate/", data_resolution, "/rij.rds"))){
 # rij <- rij_amph
 
 wb_mean <- raster(here("data/intermediate/", data_resolution, "wb_mean.tif"))
-ssp2 <- raster(here("data/intermediate/", data_resolution, "ssp2_year_50_threat_score.tif"))
+ssp2 <- raster(here("data/intermediate/", data_resolution, "ssp2_chng_threat_score.tif"))
 # clim_grid_ann <- raster(here("data/intermediate/", data_resolution, "probability-annual-iucn.tif"))
 clim_vel <- raster(here("data/intermediate/", data_resolution, "climate_climate_change_velocity_T_cl1.tif"))
 ###
@@ -217,3 +222,6 @@ count_sum <- count_df %>% group_by(NAME_0)  %>% summarise_at(2:(ncol(count_df)-2
 # %>% tally()
 
 count_sum %>% write_csv(here("data/final/", data_resolution, "country_summaries.csv"))
+
+# clean up
+# stopCluster(cl)
