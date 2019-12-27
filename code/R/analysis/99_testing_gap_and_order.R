@@ -112,7 +112,7 @@ runs <- expand.grid(wb = 0:1,
                     lu = 0:1,
                     cl = 0:1,
                     flip_priority = c(FALSE, TRUE),
-                    gap = 0.01)
+                    gap = 0.05)
 
 runs_dir <- here("data", "final", data_resolution)
 # gap <- 0.1
@@ -144,7 +144,7 @@ runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %do% {
                                         threads = parallel::detectCores() - 1)
 
   # save solution
-  str_glue_data(r, "rds_run-", sprintf("%03d", run),
+  str_glue_data(r, "rds_run-", sprintf("%03d", run + 100),
                 "_gap-{gap}_flip_priority-{flip_priority}_s-{wb}{lu}{cl}.rds") %>%
     file.path(runs_dir, .) %>%
     saveRDS(r, .)
@@ -156,7 +156,7 @@ runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %do% {
   rs1_val[keep] <- rs1_val_red
   rs1[][!is.na(pu[])] <- rs1_val
   
-  str_glue_data(r, "solution_run-", sprintf("%03d", run),
+  str_glue_data(r, "solution_run-", sprintf("%03d", run + 100),
                 "_gap-{gap}_flip_priority-{flip_priority}_s-{wb}{lu}{cl}.tif") %>% 
     file.path(runs_dir, .) %>% 
     writeRaster(rs1, .)
@@ -221,7 +221,7 @@ count_df %<>% left_join(gadm_df, by = c("gadm_country" = "NAME_IDX"))
 count_sum <- count_df %>% group_by(NAME_0)  %>% summarise_at(2:(ncol(count_df)-2), list(sum = sum))
 # %>% tally()
 
-count_sum %>% write_csv(here("data/final/", data_resolution, "country_summaries.csv"))
+count_sum %>% write_csv(here("data/final/", data_resolution, "country_summaries_gap_0.05.csv"))
 
 # clean up
 # stopCluster(cl)
