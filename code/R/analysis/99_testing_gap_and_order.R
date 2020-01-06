@@ -3,8 +3,8 @@ library(tidyverse)
 library(magrittr)
 library(foreach)
 library(prioritizr)
-setwd("E:/Richard/global_risk/")
-# setwd("D:/Work/Papers/2019_global_risk/global_risk/")
+# setwd("E:/Richard/global_risk/")
+setwd("D:/Work/Papers/2019_global_risk/global_risk/")
 library(here)
 #library(SparseData)
 # memory.limit(300000)
@@ -12,7 +12,7 @@ library(here)
 ## Define functions
 source(here("code/R/functions/multi-objective-prioritization.R"))
 
-dr <- 300
+dr <- 500
 data_resolution <- paste0(dr, "km2")
 
 pu <- raster(here("data/intermediate/", data_resolution, "land.tif"))
@@ -68,7 +68,7 @@ if( !file.exists(paste0("data/intermediate/", data_resolution, "/rij.rds"))){
 # rij <- rij_amph
 
 wb_mean <- raster(here("data/intermediate/", data_resolution, "wb_mean.tif"))
-ssp2 <- raster(here("data/intermediate/", data_resolution, "ssp2_year_50_threat_score.tif"))
+ssp2 <- raster(here("data/intermediate/", data_resolution, "ssp2_chng_threat_score.tif"))
 # clim_grid_ann <- raster(here("data/intermediate/", data_resolution, "probability-annual-iucn.tif"))
 clim_vel <- raster(here("data/intermediate/", data_resolution, "climate_climate_change_velocity_T_cl1.tif"))
 ###
