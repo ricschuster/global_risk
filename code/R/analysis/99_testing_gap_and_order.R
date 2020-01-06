@@ -17,7 +17,7 @@ source(here("code/R/functions/multi-objective-prioritization.R"))
 # cl <- makeCluster(n_cores)
 # registerDoParallel(cl)
 
-dr <- 500
+dr <- 100
 data_resolution <- paste0(dr, "km2")
 
 pu <- raster(here("data/intermediate/", data_resolution, "land.tif"))
