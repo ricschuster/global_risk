@@ -2,6 +2,7 @@ library(raster)
 library(tidyverse)
 library(magrittr)
 library(foreach)
+library(doParallel)
 library(prioritizr)
 # setwd("E:/Richard/global_risk/")
 setwd("D:/Work/Papers/2019_global_risk/global_risk/")
@@ -11,6 +12,10 @@ library(here)
 
 ## Define functions
 source(here("code/R/functions/multi-objective-prioritization.R"))
+# parallelization
+# n_cores <- 2
+# cl <- makeCluster(n_cores)
+# registerDoParallel(cl)
 
 dr <- 500
 data_resolution <- paste0(dr, "km2")
@@ -107,7 +112,7 @@ runs <- expand.grid(wb = 0:1,
                     lu = 0:1,
                     cl = 0:1,
                     flip_priority = c(FALSE, TRUE),
-                    gap = 0.01)
+                    gap = 0.03)
 
 runs_dir <- here("data", "final", data_resolution)
 # gap <- 0.1
@@ -139,7 +144,7 @@ runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %do% {
                                         threads = parallel::detectCores() - 1)
 
   # save solution
-  str_glue_data(r, "rds_run-", sprintf("%03d", run),
+  str_glue_data(r, "rds_run-", sprintf("%03d", run + 200),
                 "_gap-{gap}_flip_priority-{flip_priority}_s-{wb}{lu}{cl}.rds") %>%
     file.path(runs_dir, .) %>%
     saveRDS(r, .)
@@ -151,7 +156,7 @@ runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %do% {
   rs1_val[keep] <- rs1_val_red
   rs1[][!is.na(pu[])] <- rs1_val
   
-  str_glue_data(r, "solution_run-", sprintf("%03d", run),
+  str_glue_data(r, "solution_run-", sprintf("%03d", run + 200),
                 "_gap-{gap}_flip_priority-{flip_priority}_s-{wb}{lu}{cl}.tif") %>% 
     file.path(runs_dir, .) %>% 
     writeRaster(rs1, .)
@@ -217,3 +222,6 @@ count_sum <- count_df %>% group_by(NAME_0)  %>% summarise_at(2:(ncol(count_df)-2
 # %>% tally()
 
 count_sum %>% write_csv(here("data/final/", data_resolution, "country_summaries.csv"))
+
+# clean up
+# stopCluster(cl)
