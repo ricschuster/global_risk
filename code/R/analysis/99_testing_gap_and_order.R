@@ -170,17 +170,26 @@ runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %do% {
 ##########
 ## Post Processing
 ##########
+substrRight <- function(x, n){
+  substr(x, nchar(x)-n+1, nchar(x))
+}
 
 land <- raster(here("data/intermediate/", data_resolution, "land.tif"))
 land_area <- sum(land[], na.rm = TRUE) * prod(res(land))/1000000 /1000000
 
 
 fls <- list.files(here("data/final/", data_resolution), pattern = "*.tif$", full.names = TRUE)
-nms <- gsub(".tif", "", fls) %>% gsub(here("data/final/", data_resolution,"solution_"), "", .)
+nms <- gsub(".tif", "", fls) %>% 
+  gsub(here("data/final/", data_resolution,"solution_run-"), "", .) %>%
+  gsub("flip_priority", "fp", .)
+
+nms2 <- sprintf("SLC_%s",substrRight(nms, 3))
+
+#gap 0.05 and flip == FALSE only
+r_stack <- stack(fls[14:21])
+names(r_stack) <- nms2[14:21]
 
 
-r_stack <- stack(fls)
-names(r_stack) <- nms
 
 r_df <- as.data.frame(r_stack)
 
@@ -194,6 +203,9 @@ selected - prot
 
 (perc_increse <- perc_tot - prot/land_area*100)
 
+data.frame(t(data.frame(perc_tot = round(perc_tot, 2),
+             perc_increse = round(perc_increse, 2)))) %>%
+write.csv(here("data/final/", data_resolution, "Table1.csv"))
 
 # ss <- sum(r_stack)
 # tt <-table(round(ss[],0))
@@ -219,9 +231,14 @@ count_df <- as.data.frame(count_stack) %>% drop_na()
 count_df %<>% left_join(gadm_df, by = c("gadm_country" = "NAME_IDX"))
 
 count_sum <- count_df %>% group_by(NAME_0)  %>% summarise_at(2:(ncol(count_df)-2), list(sum = sum))
+
+count_sum_t <- (data.frame(t(as.data.frame(count_sum   ))))
+colnames(count_sum_t) <- as.character(unlist(count_sum_t[1,]))
+count_sum_t = count_sum_t[-1, ]
+
 # %>% tally()
 
-count_sum %>% write_csv(here("data/final/", data_resolution, "country_summaries.csv"))
+count_sum_t %>% write.csv(here("data/final/", data_resolution, "country_summaries.csv"))
 
 # clean up
 # stopCluster(cl)
