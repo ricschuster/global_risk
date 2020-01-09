@@ -4,8 +4,8 @@ library(magrittr)
 library(foreach)
 library(doParallel)
 library(prioritizr)
-# setwd("E:/Richard/global_risk/")
-setwd("D:/Work/Papers/2019_global_risk/global_risk/")
+setwd("E:/Richard/global_risk/")
+# setwd("D:/Work/Papers/2019_global_risk/global_risk/")
 library(here)
 #library(SparseData)
 # memory.limit(300000)
@@ -103,7 +103,8 @@ locked_in_red <- locked_in[keep]
 
 cost <- rbind(matrix(wb_val_red, nrow = 1),
               matrix(ssp2_val_red, nrow = 1),
-              matrix(clim_val_red, nrow = 1)
+              matrix(clim_val_red, nrow = 1),
+              matrix(rep(1, length(wb_val_red)), nrow = 1)
 )
 
 
@@ -111,8 +112,9 @@ cost <- rbind(matrix(wb_val_red, nrow = 1),
 runs <- expand.grid(wb = 0:1,
                     lu = 0:1,
                     cl = 0:1,
+                    ar = 1, 
                     flip_priority = c(FALSE, TRUE),
-                    gap = 0.03)
+                    gap = 0.05)
 
 runs_dir <- here("data", "final", data_resolution)
 # gap <- 0.1
@@ -122,18 +124,12 @@ runs_dir <- here("data", "final", data_resolution)
 runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %do% {
   r <- runs[run, ]
   str_glue_data(r, "Run ", run, 
-                ": wb {wb}; lu {lu}; cl {cl}; gap {gap}; flip {flip_priority}") %>% 
+                ": wb {wb}; lu {lu}; cl {cl}; ar {ar}; gap {gap}; flip {flip_priority}") %>% 
     message()
   
-  if(!any(c(r$wb, r$lu, r$cl))){
-    cost_temp <- rep(1, ncol(cost))
-    gap_temp <- r$gap
+  cost_temp <- cost[c(r$wb, r$lu * 2, r$cl * 3, r$ar * 4),]
+  gap_temp <- rep(r$gap, sum(c(r$wb, r$lu, r$cl, r$ar)))
     
-  } else {
-    cost_temp <- cost[c(r$wb, r$lu * 2, r$cl * 3),]
-    gap_temp <- rep(r$gap, sum(c(r$wb, r$lu, r$cl)))
-  }
-  
   #solve multi objective function
   s_gur <- multiobjective_prioritization(rij = rij_mat_use,
                                         obj = cost_temp,
@@ -144,8 +140,8 @@ runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %do% {
                                         threads = parallel::detectCores() - 1)
 
   # save solution
-  str_glue_data(r, "rds_run-", sprintf("%03d", run + 200),
-                "_gap-{gap}_flip_priority-{flip_priority}_s-{wb}{lu}{cl}.rds") %>%
+  str_glue_data(r, "rds_run-", sprintf("%03d", run), "_s-{wb}{lu}{cl}",
+                "_gap-{gap}_flp-{flip_priority}.rds") %>%
     file.path(runs_dir, .) %>%
     saveRDS(r, .)
 
@@ -156,8 +152,8 @@ runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %do% {
   rs1_val[keep] <- rs1_val_red
   rs1[][!is.na(pu[])] <- rs1_val
   
-  str_glue_data(r, "solution_run-", sprintf("%03d", run + 200),
-                "_gap-{gap}_flip_priority-{flip_priority}_s-{wb}{lu}{cl}.tif") %>% 
+  str_glue_data(r, "solution_run-", sprintf("%03d", run), "_s-{wb}{lu}{cl}",
+                "_gap-{gap}_flip_priority-{flip_priority}.tif") %>% 
     file.path(runs_dir, .) %>% 
     writeRaster(rs1, .)
   
