@@ -140,7 +140,7 @@ runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %do% {
                                         threads = parallel::detectCores() - 1)
 
   # save solution
-  str_glue_data(r, "rds_run-", sprintf("%03d", run), "_s-{wb}{lu}{cl}",
+  str_glue_data(r, "rds_run-", sprintf("%03d", run), "_s-{wb}{lu}{cl}{ar}",
                 "_gap-{gap}_flp-{flip_priority}.rds") %>%
     file.path(runs_dir, .) %>%
     saveRDS(r, .)
@@ -152,8 +152,8 @@ runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %do% {
   rs1_val[keep] <- rs1_val_red
   rs1[][!is.na(pu[])] <- rs1_val
   
-  str_glue_data(r, "solution_run-", sprintf("%03d", run), "_s-{wb}{lu}{cl}",
-                "_gap-{gap}_flip_priority-{flip_priority}.tif") %>% 
+  str_glue_data(r, "solution_run-", sprintf("%03d", run), "_s-{wb}{lu}{cl}{ar}",
+                "_gap-{gap}_flp-{flip_priority}.tif") %>% 
     file.path(runs_dir, .) %>% 
     writeRaster(rs1, .)
   
