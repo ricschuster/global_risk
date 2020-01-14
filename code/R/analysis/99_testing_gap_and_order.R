@@ -176,14 +176,13 @@ land_area <- sum(land[], na.rm = TRUE) * prod(res(land))/1000000 /1000000
 
 fls <- list.files(here("data/final/", data_resolution), pattern = "*.tif$", full.names = TRUE)
 nms <- gsub(".tif", "", fls) %>% 
-  gsub(here("data/final/", data_resolution,"solution_run-"), "", .) %>%
-  gsub("flip_priority", "fp", .)
+  gsub(here("data/final/", data_resolution,"solution_run-"), "", .)
 
-nms2 <- sprintf("SLC_%s",substrRight(nms, 3))
+nms2 <- sprintf("SLCA_%s_%s",substring(nms, 7, 10), c(rep("F", 8), rep("T", 8)))
 
 #gap 0.05 and flip == FALSE only
-r_stack <- stack(fls[14:21])
-names(r_stack) <- nms2[14:21]
+r_stack <- stack(fls)
+names(r_stack) <- nms2
 
 
 
