@@ -98,6 +98,7 @@ ssp2_val_red <- ssp2_val_red + 0.01
 
 clim_val <- clim[][!is.na(pu[])]
 clim_val_red <- clim_val[keep]
+clim_val_red <- ((clim_val_red - min(clim_val_red)) * 100) + 0.01
 
 locked_in_red <- locked_in[keep]
 
