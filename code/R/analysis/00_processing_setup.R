@@ -247,29 +247,47 @@ writeRaster(wdpa_rast, here("data/intermediate/", data_resolution, "wdpa_terrest
 #####
 # Climate 
 #####
-clim_grid <- st_read(here("data/raw/Climate/cell_out-49-fix.shp"), stringsAsFactors = FALSE)
-clim_grid$POLYFID <- as.numeric(clim_grid$POLYFID)
-  
-load(here("data/raw/Climate/probability-annual.RData"))
-prob_annual <- prb
-names(prob_annual)[2] <- "prob_ann"
+# clim_grid <- st_read(here("data/raw/Climate/cell_out-49-fix.shp"), stringsAsFactors = FALSE)
+# clim_grid$POLYFID <- as.numeric(clim_grid$POLYFID)
+#   
+# load(here("data/raw/Climate/probability-annual.RData"))
+# prob_annual <- prb
+# names(prob_annual)[2] <- "prob_ann"
+# 
+# load(here("data/raw/Climate/probability-sd.RData"))
+# prob_sd <- prb
+# names(prob_sd)[2] <- "prob_sd"
+# 
+# 
+# clim_grid <- clim_grid %>% left_join(prob_annual, by = "POLYFID")
+# clim_grid <- clim_grid %>% left_join(prob_sd, by = "POLYFID")
+# 
+# clim_grid %<>% drop_na() %>% st_transform(crs = crs(base_raster))
+# 
+# # use fasterize  
+# clim_grid_ann <- fasterize(clim_grid, base_raster, field = "prob_ann")
+# writeRaster(clim_grid_ann, here("data/intermediate/", data_resolution, "probability-annual-iucn.tif"), overwrite = TRUE)
+# 
+# clim_grid_sd <- fasterize(clim_grid, base_raster, field = "prob_sd")
+# writeRaster(clim_grid_sd, here("data/intermediate/", data_resolution, "probability-sd-iucn.tif"), overwrite = TRUE)
 
-load(here("data/raw/Climate/probability-sd.RData"))
-prob_sd <- prb
-names(prob_sd)[2] <- "prob_sd"
+frank_novel <- raster(here("data/raw/Climate/probability-annual.tif"))
+frank_novel %>%   projectRaster(crs = proj4string(base_raster), method = "ngb") %>%
+  resample(base_raster, method = "ngb") %>%
+  writeRaster(here("data/intermediate/", data_resolution, "climate_frank_novel.tif"), format = "GTiff", overwrite = TRUE)
 
+frank_ehe <- raster(here("data/raw/Climate/EHE_proportion-trend.tif"))
+land <- raster(here("data/intermediate/", data_resolution, "land.tif"))
 
-clim_grid <- clim_grid %>% left_join(prob_annual, by = "POLYFID")
-clim_grid <- clim_grid %>% left_join(prob_sd, by = "POLYFID")
+frank_ehe <- frank_ehe %>%   projectRaster(crs = proj4string(base_raster), method = "ngb") %>%
+  resample(base_raster, method = "ngb") 
 
-clim_grid %<>% drop_na() %>% st_transform(crs = crs(base_raster))
+frank_ehe_val <- frank_ehe[]
+frank_ehe_val <- ifelse(!is.na(land[]), frank_ehe_val, NA) 
+frank_ehe[] <- frank_ehe_val
 
-# use fasterize  
-clim_grid_ann <- fasterize(clim_grid, base_raster, field = "prob_ann")
-writeRaster(clim_grid_ann, here("data/intermediate/", data_resolution, "probability-annual-iucn.tif"), overwrite = TRUE)
-
-clim_grid_sd <- fasterize(clim_grid, base_raster, field = "prob_sd")
-writeRaster(clim_grid_sd, here("data/intermediate/", data_resolution, "probability-sd-iucn.tif"), overwrite = TRUE)
+frank_ehe %>% 
+  writeRaster(here("data/intermediate/", data_resolution, "climate_frank_ehe.tif"), format = "GTiff", overwrite = TRUE)
 
 
 #####
