@@ -124,6 +124,10 @@ runs_dir <- here("data", "final", data_resolution)
 
 runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %do% {
   r <- runs[run, ]
+  
+  # Start the loop from index >1
+  # if(run < 8) return(NULL)
+  
   str_glue_data(r, "Run ", run, 
                 ": wb {wb}; lu {lu}; cl {cl}; ar {ar}; gap {gap}; flip {flip_priority}") %>% 
     message()
