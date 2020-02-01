@@ -104,8 +104,14 @@ count_sum %>% write_csv(here("data/final/", data_resolution, "country_summaries.
 #####
 # Maps
 fls2 <- list.files(here("data/final/", data_resolution), pattern = "*.tif", full.names = TRUE)
+nms2 <- list.files(here("data/final/", data_resolution), pattern = "*.tif") %>% 
+  gsub("_gap-0.05_flp-FALSE.tif", "", .)
+
+
+
 
 os1 <- stack(fls2[1:8])
+names(os1) <- sprintf("SLCA_%s",substring(nms2[1:8], 20, 24))
 os1_sum <- sum(os1)
 writeRaster(os1_sum, here("data/final/", data_resolution, "sum_no_flip.tif"))
 
@@ -116,3 +122,29 @@ sel_fr[10] <- sel_fr[9] - sum(locked_in_red)
 names(sel_fr)[10] <- "8-prot"
 
 sel_fr * 100 / 1000000/ land_area * 100
+
+
+biomes <- raster(here("data/intermediate/", data_resolution, "biomes.tif"))
+biom_nm <- read_csv(here("data/intermediate/", data_resolution, "biomes.csv"))
+
+
+os1_b_df <- stack(os1, biomes) %>% as.data.frame(.) %>% drop_na() %>%
+  left_join(biom_nm, by = c("biomes" = "BIOME_NUM")) %>%
+  dplyr::select(-c(biomes))
+
+os1_b_out <- os1_b_df %>% group_by(BIOME_NAME) %>% summarise_all(sum)
+
+os1_b_out2 <- cbind(os1_b_out$BIOME_NAME,
+  data.frame(round(os1_b_out[,-1] / os1_b_out$SLCA_0001 * 100 - 100, 2))[,-1])
+
+
+library(ggradar)
+library(dplyr)
+library(scales)
+library(tibble)
+
+mtcars_radar <- mtcars %>% 
+  as_tibble(rownames = "group") %>% 
+  mutate_at(vars(-group), rescale) %>% 
+  tail(4) %>% 
+  select(1:10)
