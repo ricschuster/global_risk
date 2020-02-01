@@ -4,8 +4,8 @@ library(magrittr)
 library(foreach)
 library(doParallel)
 library(prioritizr)
-setwd("E:/Richard/global_risk/")
-# setwd("D:/Work/Papers/2019_global_risk/global_risk/")
+# setwd("E:/Richard/global_risk/")
+setwd("D:/Work/Papers/2019_global_risk/global_risk/")
 library(here)
 #library(SparseData)
 # memory.limit(300000)
@@ -148,7 +148,7 @@ runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %do% {
   str_glue_data(r, "rds_run-", sprintf("%03d", run), "_s-{wb}{lu}{cl}{ar}",
                 "_gap-{gap}_flp-{flip_priority}.rds") %>%
     file.path(runs_dir, .) %>%
-    saveRDS(r, .)
+    saveRDS(s_gur, .)
   
   rs1 <- raster(pu)
   rs1_val <- rs1[][!is.na(pu[])]

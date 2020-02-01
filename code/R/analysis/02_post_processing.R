@@ -17,14 +17,15 @@ wdpa <- raster(here("data/intermediate/", data_resolution, "wdpa_terrestrial.tif
 land <- raster(here("data/intermediate/", data_resolution, "land.tif"))
 
 wb_mean <- raster(here("data/intermediate/", data_resolution, "wb_mean.tif"))
-ssp2 <- raster(here("data/intermediate/", data_resolution, "ssp2_year_50_threat_score.tif"))
+ssp2 <- raster(here("data/intermediate/", data_resolution, "ssp2_chng_threat_score.tif"))
 # clim_grid_ann <- raster(here("data/intermediate/", data_resolution, "probability-annual-iucn.tif"))
-clim_vel <- raster(here("data/intermediate/", data_resolution, "climate_climate_change_velocity_T_cl1.tif"))
+clim <- raster(here("data/intermediate/", data_resolution, "climate_frank_ehe.tif"))
+
 ###
 # only keep values that are present in all 3 threat layers
 ###
 
-cdf <- as.data.frame(stack(pu, wb_mean, ssp2, clim_vel))
+cdf <- as.data.frame(stack(pu, wb_mean, ssp2, clim))
 cdf_red <- cdf[!is.na(cdf$land), ]
 keep <- !is.na(rowSums(cdf_red))
 
@@ -98,3 +99,18 @@ count_sum <- count_df %>% group_by(NAME_0)  %>% summarise_at(2:9, list(sum = sum
 # %>% tally()
 
 count_sum %>% write_csv(here("data/final/", data_resolution, "country_summaries.csv"))
+
+
+#####
+# Maps
+fls2 <- list.files(here("data/final/", data_resolution), pattern = "*.tif", full.names = TRUE)
+
+os1 <- stack(fls2[1:8])
+os1_sum <- sum(os1)
+writeRaster(os1_sum, here("data/final/", data_resolution, "sum_no_flip.tif"))
+
+sum(locked_in_red)
+
+sel_fr <- table(os1_sum[])
+sel_fr[10] <- sel_fr[9] - sum(locked_in_red)
+names(sel_fr)[10] <- "8-prot"
