@@ -6,7 +6,7 @@ library(raster)
 library(magrittr)
 library(wdpar)
 library(tidyverse)
-setwd("E:/Richard/global_risk/")
+# setwd("E:/Richard/global_risk/")
 library(here)
 
 ## Define functions
@@ -377,3 +377,15 @@ writeRaster(ssp2_chng, here("data/intermediate/", data_resolution, "ssp2_chng_th
 ssp3_chng <- (a * lu_base + b * ssp3)/(a + b)
 writeRaster(ssp3_chng, here("data/intermediate/", data_resolution, "ssp3_chng_threat_score.tif"), overwrite = TRUE)
 
+#####
+# Biomes
+#####
+ecoregions <- st_read(here("data/raw/Ecoregions/Ecoregions2017.shp"), stringsAsFactors = FALSE)
+ecoregions %<>% st_transform(crs = crs(base_raster))
+biomes <- fasterize(ecoregions, base_raster, field = "BIOME_NUM")
+writeRaster(biomes, here("data/intermediate/", data_resolution, "biomes.tif"), overwrite = TRUE)
+
+
+nm_df <- ecoregions %>% st_set_geometry(NULL) %>% group_by(BIOME_NUM) %>% summarise(BIOME_NAME = first(BIOME_NAME))
+
+nm_df %>% write_csv(here("data/intermediate/", data_resolution, "biomes.csv"))
