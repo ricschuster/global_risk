@@ -114,3 +114,5 @@ sum(locked_in_red)
 sel_fr <- table(os1_sum[])
 sel_fr[10] <- sel_fr[9] - sum(locked_in_red)
 names(sel_fr)[10] <- "8-prot"
+
+sel_fr * 100 / 1000000/ land_area * 100
