@@ -132,16 +132,22 @@ os1_b_df <- stack(os1, biomes) %>% as.data.frame(.) %>% drop_na() %>%
   left_join(biom_nm, by = c("biomes" = "BIOME_NUM")) %>%
   dplyr::select(-c(biomes))
 
-os1_b_out <- os1_b_df %>% group_by(BIOME_NAME) %>% summarise_all(sum)
+os1_b_out_n <- os1_b_df %>% group_by(BIOME_NAME) %>% summarise(n = n())
+
+os1_b_out <- os1_b_df %>% group_by(BIOME_NAME) %>% summarise_all(sum) %>%
+  mutate(n = os1_b_out_n$n)
 
 os1_b_out2 <- cbind(os1_b_out$BIOME_NAME,
   data.frame(round(os1_b_out[,-1] / os1_b_out$SLCA_0001 * 100 - 100, 2))[,-1])
 
+os1_b_out3 <- cbind(os1_b_out$BIOME_NAME,
+                    data.frame(os1_b_out[,-1] / os1_b_out$n))[,-10]
 
 library(ggradar)
 library(dplyr)
 library(scales)
 library(tibble)
+
 
 mtcars_radar <- mtcars %>% 
   as_tibble(rownames = "group") %>% 
@@ -171,7 +177,11 @@ ggradar(tt,
         values.radar = c("-10%", "base", "+22%"),
         grid.min = -10, 
         grid.mid = 0,
-        grid.max = 22)
+        grid.max = 22,
+        base.size = 20,
+        grid.label.size = 10,
+        axis.label.size = 8,
+        legend.text.size = 20)
 
 tt2 <- tt %>% gather("biome", "value", -group)
 
@@ -179,3 +189,18 @@ ggplot(tt2, aes(x = biome, y = value, group = group)) +
   geom_line(aes(color = group))+
   geom_point(aes(color = group))
   
+
+
+row.names(os1_b_out3) <- os1_b_out3$`os1_b_out$BIOME_NAME`
+tt <- t(os1_b_out3[,-1])
+tt <- data.frame(group = row.names(tt), tt)
+
+ggradar(tt, 
+        values.radar = c("28%", "37%", "46%"),
+        grid.min = 0.28, 
+        grid.mid = 0.37,
+        grid.max = 0.46,
+        base.size = 20,
+        grid.label.size = 10,
+        axis.label.size = 8,
+        legend.text.size = 20)
