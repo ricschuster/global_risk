@@ -148,3 +148,34 @@ mtcars_radar <- mtcars %>%
   mutate_at(vars(-group), rescale) %>% 
   tail(4) %>% 
   select(1:10)
+
+ggradar(mtcars_radar)
+
+
+os1_radar <- os1_b_out2 %>% 
+  as_tibble(os1_b_out$BIOME_NAME) %>% 
+  mutate_at(vars(-group), rescale) %>% 
+  tail(4) %>% 
+  select(1:10)
+
+ggradar(os1_b_out2, 
+        grid.min = -10, 
+        grid.mid = 5,
+        grid.max = 21)
+
+row.names(os1_b_out2) <- os1_b_out2$`os1_b_out$BIOME_NAME`
+tt <- t(os1_b_out2[,-1])
+tt <- data.frame(group = row.names(tt), tt)
+
+ggradar(tt, 
+        values.radar = c("-10%", "base", "+22%"),
+        grid.min = -10, 
+        grid.mid = 0,
+        grid.max = 22)
+
+tt2 <- tt %>% gather("biome", "value", -group)
+
+ggplot(tt2, aes(x = biome, y = value, group = group)) +
+  geom_line(aes(color = group))+
+  geom_point(aes(color = group))
+  
