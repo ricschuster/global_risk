@@ -15,11 +15,14 @@ data_resolution <- paste0(dr, "km2")
 pu <- raster(here("data/intermediate/", data_resolution, "land.tif"))
 wdpa <- raster(here("data/intermediate/", data_resolution, "wdpa_terrestrial.tif"))
 land <- raster(here("data/intermediate/", data_resolution, "land.tif"))
+land_area <- sum(land[], na.rm = TRUE) * prod(res(land))/1000000 /1000000
 
 wb_mean <- raster(here("data/intermediate/", data_resolution, "wb_mean.tif"))
 ssp2 <- raster(here("data/intermediate/", data_resolution, "ssp2_chng_threat_score.tif"))
 # clim_grid_ann <- raster(here("data/intermediate/", data_resolution, "probability-annual-iucn.tif"))
 clim <- raster(here("data/intermediate/", data_resolution, "climate_frank_ehe.tif"))
+
+
 
 ###
 # only keep values that are present in all 3 threat layers
@@ -204,3 +207,4 @@ ggradar(tt,
         grid.label.size = 10,
         axis.label.size = 8,
         legend.text.size = 20)
+

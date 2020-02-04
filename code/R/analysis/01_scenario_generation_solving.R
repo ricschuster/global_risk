@@ -179,7 +179,7 @@ land <- raster(here("data/intermediate/", data_resolution, "land.tif"))
 land_area <- sum(land[], na.rm = TRUE) * prod(res(land))/1000000 /1000000
 
 
-fls <- list.files(here("data/final/", data_resolution), pattern = "*.tif$", full.names = TRUE)
+fls <- list.files(here("data/final/", data_resolution), pattern = "*.tif$", full.names = TRUE)[1:16]
 nms <- gsub(".tif", "", fls) %>% 
   gsub(here("data/final/", data_resolution,"solution_run-"), "", .)
 
@@ -232,13 +232,19 @@ count_df %<>% left_join(gadm_df, by = c("gadm_country" = "NAME_IDX"))
 
 count_sum <- count_df %>% group_by(NAME_0)  %>% summarise_at(2:(ncol(count_df)-2), list(sum = sum))
 
-count_sum_t <- (data.frame(t(as.data.frame(count_sum   ))))
+count_sum_t <- data.frame(t(as.data.frame(count_sum   )), stringsAsFactors = FALSE)
 colnames(count_sum_t) <- as.character(unlist(count_sum_t[1,]))
 count_sum_t = count_sum_t[-1, ]
-
+rwnms <- row.names(count_sum_t)
+count_sum_t <- mutate_all(count_sum_t, function(x) as.numeric(as.character(x)))
 # %>% tally()
 
 count_sum_t %>% write.csv(here("data/final/", data_resolution, "country_summaries.csv"))
 
 # clean up
 # stopCluster(cl)
+
+count_sum_2 <- data.frame(mapply('/', count_sum_t, count_sum_t[1,])[2:8,])
+row.names(count_sum_2) <- rwnms[2:8]
+
+
