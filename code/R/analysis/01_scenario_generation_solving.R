@@ -247,4 +247,18 @@ count_sum_t %>% write.csv(here("data/final/", data_resolution, "country_summarie
 count_sum_2 <- data.frame(mapply('/', count_sum_t, count_sum_t[1,])[2:8,])
 row.names(count_sum_2) <- rwnms[2:8]
 
+is.na(count_sum_2) <- sapply(count_sum_2, is.infinite)
+count_sum_2[is.na(count_sum_2)] <- NA
 
+count_sum_2 %>% 
+  write.csv(here("data/final/", data_resolution, "Table2_detail.csv"))
+
+c_sum_tab <- data.frame(scenario = row.names(count_sum_2),
+                        mean = apply(count_sum_2, 1, function(x) mean(x, na.rm = TRUE)),
+                        min = apply(count_sum_2, 1, function(x) min(x, na.rm = TRUE)),
+                        max = apply(count_sum_2, 1, function(x) max(x, na.rm = TRUE)),
+                        low = apply(count_sum_2, 1, function(x) quantile(x, prob = 0.05, na.rm = TRUE)),
+                        high = apply(count_sum_2, 1, function(x) quantile(x, prob = 0.95, na.rm = TRUE)))
+
+c_sum_tab %>% 
+write.csv(here("data/final/", data_resolution, "Table2.csv"), row.names = FALSE)

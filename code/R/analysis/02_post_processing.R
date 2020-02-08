@@ -116,7 +116,7 @@ nms2 <- list.files(here("data/final/", data_resolution), pattern = "*.tif") %>%
 os1 <- stack(fls2[1:8])
 names(os1) <- sprintf("SLCA_%s",substring(nms2[1:8], 20, 24))
 os1_sum <- sum(os1)
-writeRaster(os1_sum, here("data/final/", data_resolution, "sum_no_flip.tif"))
+# writeRaster(os1_sum, here("data/final/", data_resolution, "sum_no_flip.tif"))
 
 sum(locked_in_red)
 
@@ -137,14 +137,14 @@ os1_b_df <- stack(os1, biomes) %>% as.data.frame(.) %>% drop_na() %>%
 
 os1_b_out_n <- os1_b_df %>% group_by(BIOME_NAME) %>% summarise(n = n())
 
-os1_b_out <- os1_b_df %>% group_by(BIOME_NAME) %>% summarise_all(sum) %>%
-  mutate(n = os1_b_out_n$n)
+os1_b_out <- os1_b_df %>% group_by(BIOME_NAME) %>% summarise_all(sum) #%>%
+  # mutate(n = os1_b_out_n$n)
 
 os1_b_out2 <- cbind(os1_b_out$BIOME_NAME,
   data.frame(round(os1_b_out[,-1] / os1_b_out$SLCA_0001 * 100 - 100, 2))[,-1])
 
 os1_b_out3 <- cbind(os1_b_out$BIOME_NAME,
-                    data.frame(os1_b_out[,-1] / os1_b_out$n))[,-10]
+                    data.frame(os1_b_out[,-1] / os1_b_out_n$n))[,-10]
 
 library(ggradar)
 library(dplyr)
