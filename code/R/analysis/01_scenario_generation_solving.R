@@ -4,8 +4,8 @@ library(magrittr)
 library(foreach)
 library(doParallel)
 library(prioritizr)
-setwd("E:/Richard/global_risk/")
-# setwd("D:/Work/Papers/2019_global_risk/global_risk/")
+# setwd("E:/Richard/global_risk/")
+ setwd("D:/Work/Papers/2019_global_risk/global_risk/")
 library(here)
 #library(SparseData)
 # memory.limit(300000)
@@ -73,14 +73,14 @@ if( !file.exists(paste0("data/intermediate/", data_resolution, "/rij.rds"))){
 # rij <- rij_amph
 
 wb_mean <- raster(here("data/intermediate/", data_resolution, "wb_mean.tif"))
-ssp2 <- raster(here("data/intermediate/", data_resolution, "ssp2_chng_threat_score.tif"))
+lands <- raster(here("data/intermediate/", data_resolution, "kehoe_land_system.tif"))
 # clim_grid_ann <- raster(here("data/intermediate/", data_resolution, "probability-annual-iucn.tif"))
 clim <- raster(here("data/intermediate/", data_resolution, "climate_frank_ehe.tif"))
 ###
 # only keep values that are present in all 3 threat layers
 ###
 
-cdf <- as.data.frame(stack(pu, wb_mean, ssp2, clim))
+cdf <- as.data.frame(stack(pu, wb_mean, lands, clim))
 cdf_red <- cdf[!is.na(cdf$land), ]
 keep <- !is.na(rowSums(cdf_red))
 
@@ -92,9 +92,9 @@ wb_val <- wb_mean[][!is.na(pu[])]
 wb_val_red <- wb_val[keep]
 wb_val_red <- (wb_val_red + min(wb_val_red)) * -1
 
-ssp2_val <- ssp2[][!is.na(pu[])]
-ssp2_val_red <- ssp2_val[keep]
-ssp2_val_red <- ssp2_val_red + 0.01
+lands_val <- lands[][!is.na(pu[])]
+lands_val_red <- lands_val[keep]
+lands_val_red <- (lands_val_red - 100) * -1
 
 clim_val <- clim[][!is.na(pu[])]
 clim_val_red <- clim_val[keep]
@@ -103,7 +103,7 @@ clim_val_red <- ((clim_val_red - min(clim_val_red)) * 100) + 0.01
 locked_in_red <- locked_in[keep]
 
 cost <- rbind(matrix(wb_val_red, nrow = 1),
-              matrix(ssp2_val_red, nrow = 1),
+              matrix(lands_val_red, nrow = 1),
               matrix(clim_val_red, nrow = 1),
               matrix(rep(1, length(wb_val_red)), nrow = 1)
 )
@@ -142,7 +142,7 @@ runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %do% {
                                          relative_target = rep(0.30, nrow(rij)),
                                          gap = gap_temp,
                                          flip_priority = r$flip_priority,
-                                         threads = parallel::detectCores() - 1)
+                                         threads = parallel::detectCores() - 6)
   
   # save solution
   str_glue_data(r, "rds_run-", sprintf("%03d", run), "_s-{wb}{lu}{cl}{ar}",
@@ -160,7 +160,7 @@ runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %do% {
   str_glue_data(r, "solution_run-", sprintf("%03d", run), "_s-{wb}{lu}{cl}{ar}",
                 "_gap-{gap}_flp-{flip_priority}.tif") %>% 
     file.path(runs_dir, .) %>% 
-    writeRaster(rs1, .)
+    writeRaster(rs1, overwrite = TRUE, .)
   
   rm(cost_temp, gap_temp, s_gur, rs1)
   r

@@ -381,7 +381,16 @@ writeRaster(ssp3_chng, here("data/intermediate/", data_resolution, "ssp3_chng_th
 # Land use (Laura Kehoe)
 # https://www.nature.com/articles/s41559-017-0234-3
 #####
-legendkey <- read_csv(here("data/raw/Land_use/Kehoe/Global-Land-Systems-Map_ArcGIS/legendkey.csv"))
+legendkey <- read_csv(here("data/raw/Land_use/Kehoe/Global-Land-Systems-Map_ArcGIS/legendkey_rs.csv"))
+
+kehoe_ls <- raster(here("data/raw/Land_use/Kehoe/Global-Land-Systems-Map_ArcGIS/LSC_v02.tif")) %>% 
+  projectRaster(crs = proj4string(base_raster), method = "ngb") %>%
+  resample(base_raster, method = "ngb")
+
+ls_base_tib <- tibble(Value = kehoe_ls[]) %>% left_join(legendkey, by = "Value")
+kehoe_ls[] <- ls_base_tib$Abundance
+writeRaster(kehoe_ls, here("data/intermediate/", data_resolution, "kehoe_land_system.tif"), overwrite = TRUE)
+
 
 #####
 # Biomes
