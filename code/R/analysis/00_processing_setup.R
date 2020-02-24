@@ -378,6 +378,12 @@ ssp3_chng <- (a * lu_base + b * ssp3)/(a + b)
 writeRaster(ssp3_chng, here("data/intermediate/", data_resolution, "ssp3_chng_threat_score.tif"), overwrite = TRUE)
 
 #####
+# Land use (Laura Kehoe)
+# https://www.nature.com/articles/s41559-017-0234-3
+#####
+legendkey <- read_csv(here("data/raw/Land_use/Kehoe/Global-Land-Systems-Map_ArcGIS/legendkey.csv"))
+
+#####
 # Biomes
 #####
 ecoregions <- st_read(here("data/raw/Ecoregions/Ecoregions2017.shp"), stringsAsFactors = FALSE)
