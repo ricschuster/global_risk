@@ -234,9 +234,10 @@ count_sum <- count_df %>% group_by(NAME_0)  %>% summarise_at(2:(ncol(count_df)-2
 
 count_sum_t <- data.frame(t(as.data.frame(count_sum   )), stringsAsFactors = FALSE)
 colnames(count_sum_t) <- as.character(unlist(count_sum_t[1,]))
-count_sum_t = count_sum_t[-1, ]
+count_sum_t <- count_sum_t[-1, ]
 rwnms <- row.names(count_sum_t)
 count_sum_t <- mutate_all(count_sum_t, function(x) as.numeric(as.character(x)))
+row.names(count_sum_t) <- rwnms
 # %>% tally()
 
 count_sum_t %>% write.csv(here("data/final/", data_resolution, "country_summaries.csv"))

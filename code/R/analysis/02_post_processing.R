@@ -18,7 +18,7 @@ land <- raster(here("data/intermediate/", data_resolution, "land.tif"))
 land_area <- sum(land[], na.rm = TRUE) * prod(res(land))/1000000 /1000000
 
 wb_mean <- raster(here("data/intermediate/", data_resolution, "wb_mean.tif"))
-ssp2 <- raster(here("data/intermediate/", data_resolution, "ssp2_chng_threat_score.tif"))
+ssp2 <- raster(here("data/intermediate/", data_resolution, "kehoe_land_system.tif"))
 # clim_grid_ann <- raster(here("data/intermediate/", data_resolution, "probability-annual-iucn.tif"))
 clim <- raster(here("data/intermediate/", data_resolution, "climate_frank_ehe.tif"))
 
@@ -41,7 +41,7 @@ nms <- gsub(".rds", "", fls)
 
 rds_rast <- list()
 
-for(ii in 1:length(fls)){
+for(ii in 1:8){
   
   rs1 <- raster(pu)
   rs1_val <- rs1[][!is.na(pu[])]
@@ -177,10 +177,10 @@ tt <- t(os1_b_out2[,-1])
 tt <- data.frame(group = row.names(tt), tt)
 
 ggradar(tt, 
-        values.radar = c("-10%", "base", "+22%"),
+        values.radar = c("-10%", "base", "+25%"),
         grid.min = -10, 
         grid.mid = 0,
-        grid.max = 22,
+        grid.max = 25,
         base.size = 20,
         grid.label.size = 10,
         axis.label.size = 8,
@@ -201,8 +201,8 @@ tt <- data.frame(group = row.names(tt), tt)
 ggradar(tt, 
         values.radar = c("28%", "37%", "46%"),
         grid.min = 0.28, 
-        grid.mid = 0.37,
-        grid.max = 0.46,
+        grid.mid = 0.36,
+        grid.max = 0.44,
         base.size = 20,
         grid.label.size = 10,
         axis.label.size = 8,
