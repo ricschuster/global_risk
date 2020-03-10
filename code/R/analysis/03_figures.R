@@ -30,29 +30,29 @@ land <- st_transform(land, crs = proj4string(out_r))
 countries <- st_transform(countries, crs = proj4string(out_r))
 
 
-# BLM comparison figure
-here("Figures", paste0("Figure S10", ".png")) %>%
-  png(width = 2000, height = 3000, res = 300)
+# F1
+here("manuscript/figures", paste0("Figure 1", ".png")) %>%
+  png(width = 4000, height = 4000, res = 600)
 
-par(mfrow=c(4,2))
+old.par <- par(mfrow=c(4,2))
 par(mar = c(0.1, 0.1, 0.1, 0.1), oma = c(0,3.5,1.5,0), bg = "white")
 
 for (ii in 1:nlayers(out_r)) {
   # print map
   plot(land$geometry, col = "grey", border = NA)
-  title(names(out_r)[ii], cex.main = 1.5)
+  # title(names(out_r)[ii], cex.main = 1.5)
 
-  plot(out_r[[ii]], add = TRUE, col = c(rgb(0,0,0,alpha=0), "#2c7bb6"), legend = FALSE, 
+  plot(out_r[[ii]], add = TRUE, col = c(rgb(0,0,0,alpha=0), "#8c510a"), legend = FALSE, 
        maxpixels = ncell(out_r))
   
-  plot(wdpa, add = TRUE, col = "#31a354", legend = FALSE)
+  plot(wdpa, add = TRUE, col = "#01665e", legend = FALSE)
   # if(lh[[ii]]){
   #   add_legend("", pal, legend_offsets[3], low_high = lh[ii],
   #              text_col = text_col)
   # }
   
   # boundaries
-  plot(countries$geometry, col = NA, lwd = 1, add = TRUE)
+  plot(countries$geometry, col = NA, lwd = 0.5, add = TRUE)
   
   # # title
   # # plot bounds
@@ -71,15 +71,47 @@ for (ii in 1:nlayers(out_r)) {
   
 }
 
-mtext("Gurobi", side=3, at = 0.16, cex=1, col="black", outer=TRUE) 
-mtext("Symphony", side=3, at = 0.5, cex=1, col="black", outer=TRUE) 
-mtext("Marxan", side=3, at = 0.825, cex=1, col="black", outer=TRUE) 
+# mtext("Gurobi", side=3, at = 0.16, cex=1, col="black", outer=TRUE) 
+# mtext("Symphony", side=3, at = 0.5, cex=1, col="black", outer=TRUE) 
+# mtext("Marxan", side=3, at = 0.825, cex=1, col="black", outer=TRUE) 
+# 
+# mtext("0.1", side=2, at = 0.9, cex=1, col="black", outer=TRUE, las = 1) 
+# mtext("1", side=2, at = 0.7, cex=1, col="black", outer=TRUE, las = 1) 
+# mtext("10", side=2, at = 0.5, cex=1, col="black", outer=TRUE, las = 1) 
+# mtext("100", side=2, at = 0.3, cex=1, col="black", outer=TRUE, las = 1) 
+# mtext("1,000", side=2, at = 0.1, cex=1, col="black", outer=TRUE, las = 1) 
 
-mtext("0.1", side=2, at = 0.9, cex=1, col="black", outer=TRUE, las = 1) 
-mtext("1", side=2, at = 0.7, cex=1, col="black", outer=TRUE, las = 1) 
-mtext("10", side=2, at = 0.5, cex=1, col="black", outer=TRUE, las = 1) 
-mtext("100", side=2, at = 0.3, cex=1, col="black", outer=TRUE, las = 1) 
-mtext("1,000", side=2, at = 0.1, cex=1, col="black", outer=TRUE, las = 1) 
+dev.off()
+# 
+
+
+# F2
+
+out_sum <- sum(out_r)
+values(out_sum)[values(out_sum) == 0] <-  NA
+
+here("manuscript/figures", paste0("Figure 2", ".png")) %>%
+  png(width = 3600 * 4, height = 2000 * 4, res = 500)
+
+par(mfrow=c(1, 1))
+
+plot(land$geometry, col = "grey", border = NA)
+
+pal <- brewer.pal(9, 'YlOrRd')
+pal <- colorRampPalette(pal)
+
+plot(out_sum, add = TRUE, col = pal(8), legend = FALSE, 
+     maxpixels = ncell(out_sum))
+
+plot(wdpa, add = TRUE, col = "#01665e", legend = FALSE)
+# if(lh[[ii]]){
+#   add_legend("", pal, legend_offsets[3], low_high = lh[ii],
+#              text_col = text_col)
+# }
+
+# boundaries
+plot(countries$geometry, col = NA, lwd = 0.5, add = TRUE)
+
 
 dev.off()
 # 
