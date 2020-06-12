@@ -149,6 +149,9 @@ os1_b_out2 <- cbind(os1_b_out$BIOME_NAME,
 os1_b_out3 <- os1_b_df %>% group_by(BIOME_NAME) %>% 
   summarise(across(everything(), function(x) round(sum(x, na.rm = T)/n(), 4)))
 
+os1_b_out3 %>% write_csv(here("data/final/", data_resolution, "biome_summaries.csv"))
+
+
 library(ggradar)
 library(dplyr)
 library(scales)
