@@ -147,7 +147,7 @@ os1_b_out2 <- cbind(os1_b_out$BIOME_NAME,
   data.frame(round(os1_b_out[,-1] / os1_b_out$SLCA_0001 * 100 - 100, 2))[,-1])
 
 os1_b_out3 <- os1_b_df %>% group_by(BIOME_NAME) %>% 
-  summarise(across(everything(), function(x) round(sum(x, na.rm = T)/n(), 4)))
+  summarise(across(everything(), function(x) round(sum(x, na.rm = T)/n()*100, 2)))
 
 os1_b_out3 %>% write_csv(here("data/final/", data_resolution, "biome_summaries.csv"))
 
