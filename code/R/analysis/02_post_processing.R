@@ -98,7 +98,11 @@ count_df <- as.data.frame(count_stack) %>% drop_na()
 
 count_df %<>% left_join(gadm_df, by = c("gadm_country" = "NAME_IDX"))
 
-count_sum <- count_df %>% group_by(NAME_0)  %>% summarise_at(2:9, list(sum = sum))
+# count_sum <- count_df %>% group_by(NAME_0)  %>% summarise(across(2:9, sum), n = n())
+
+count_sum <- count_df %>% group_by(NAME_0)  %>% 
+  summarise(across(2:9, function(x) round(sum(x, na.rm = T)/n())))
+# summarise_at(2:9, list(sum = sum))
 # %>% tally()
 
 count_sum %>% write_csv(here("data/final/", data_resolution, "country_summaries.csv"))
