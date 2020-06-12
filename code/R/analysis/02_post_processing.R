@@ -101,7 +101,7 @@ count_df %<>% left_join(gadm_df, by = c("gadm_country" = "NAME_IDX"))
 # count_sum <- count_df %>% group_by(NAME_0)  %>% summarise(across(2:9, sum), n = n())
 
 count_sum <- count_df %>% group_by(NAME_0)  %>% 
-  summarise(across(2:9, function(x) round(sum(x, na.rm = T)/n())))
+  summarise(across(2:9, function(x) round(sum(x, na.rm = T)/n()*100, 2)))
 # summarise_at(2:9, list(sum = sum))
 # %>% tally()
 
@@ -142,13 +142,12 @@ os1_b_df <- stack(os1, biomes) %>% as.data.frame(.) %>% drop_na() %>%
 os1_b_out_n <- os1_b_df %>% group_by(BIOME_NAME) %>% summarise(n = n())
 
 os1_b_out <- os1_b_df %>% group_by(BIOME_NAME) %>% summarise_all(sum) #%>%
-  # mutate(n = os1_b_out_n$n)
 
 os1_b_out2 <- cbind(os1_b_out$BIOME_NAME,
   data.frame(round(os1_b_out[,-1] / os1_b_out$SLCA_0001 * 100 - 100, 2))[,-1])
 
-os1_b_out3 <- cbind(os1_b_out$BIOME_NAME,
-                    data.frame(os1_b_out[,-1] / os1_b_out_n$n))[,-10]
+os1_b_out3 <- os1_b_df %>% group_by(BIOME_NAME) %>% 
+  summarise(across(everything(), function(x) round(sum(x, na.rm = T)/n(), 4)))
 
 library(ggradar)
 library(dplyr)
@@ -211,4 +210,14 @@ ggradar(tt,
         grid.label.size = 10,
         axis.label.size = 8,
         legend.text.size = 20)
+
+tt <- as.data.frame(os1_b_out3)
+row.names(tt) <- tt$`BIOME_NAME`
+tt <- t(tt[,-1]) %>% 
+  data.frame() %>% 
+  rownames_to_column(var="group")
+ggradar(tt,
+        grid.min = min(sapply(tt[,-1], min)),
+        grid.max = max(sapply(tt[,-1], max)))
+
 
