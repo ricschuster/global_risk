@@ -1,0 +1,276 @@
+library(raster)
+library(tidyverse)
+library(magrittr)
+library(foreach)
+library(doParallel)
+library(prioritizr)
+# setwd("E:/Richard/global_risk/")
+ setwd("D:/Work/Papers/2019_global_risk/global_risk/")
+library(here)
+#library(SparseData)
+# memory.limit(300000)
+
+## Define functions
+source(here("code/R/functions/multi-objective-prioritization.R"))
+# parallelization
+n_cores <- 4
+cl <- makeCluster(n_cores)
+registerDoParallel(cl)
+
+dr <- 100
+data_resolution <- paste0(dr, "km2")
+
+pu <- raster(here("data/intermediate/", data_resolution, "land.tif"))
+wdpa <- raster(here("data/intermediate/", data_resolution, "wdpa_terrestrial.tif"))
+locked_in <- ifelse(!is.na(wdpa[][!is.na(pu[])]), TRUE, FALSE)
+
+
+if( !file.exists(paste0("data/intermediate/", data_resolution, "/rij.rds"))){
+  
+  amph <- stack(list.files(here("data/raw/IUCN/Amph/"), full.names = TRUE))
+  rij_amph <- rij_matrix(pu, amph)
+  saveRDS(rij_amph, here("data/intermediate/", data_resolution, "rij_amph.rds"))
+  
+  bird <- stack(list.files(here("data/raw/IUCN/Bird/"), full.names = TRUE))
+  rij_bird <- rij_matrix(pu, bird)
+  saveRDS(rij_bird, here("data/intermediate/", data_resolution, "rij_bird.rds"))
+  
+  mamm <- stack(list.files(here("data/raw/IUCN/Mamm/"), full.names = TRUE))
+  rij_mamm <- rij_matrix(pu, mamm)
+  saveRDS(rij_mamm, here("data/intermediate/", data_resolution, "rij_mamm.rds"))
+  
+  rept <- stack(list.files(here("data/raw/IUCN/Rept/"), full.names = TRUE))
+  rij_rept <- rij_matrix(pu, rept)
+  saveRDS(rij_rept, here("data/intermediate/", data_resolution, "rij_rept.rds"))
+  
+  rij <- rbind(rij_amph, rij_bird, rij_mamm, rij_rept)
+  
+  features <- stack(amph, bird, mamm, rept)
+  
+  
+  spec <- data.frame(id = 1:nlayers(features),
+                     name = names(features),
+                     stringsAsFactors = FALSE)
+  
+  saveRDS(rij, here("data/intermediate/", data_resolution, "rij.rds"))
+  saveRDS(spec, here("data/intermediate/", data_resolution, "spec.rds"))
+  
+} else {
+  rij <- readRDS(here("data/intermediate/", data_resolution, "rij.rds"))
+  spec <- readRDS(here("data/intermediate/", data_resolution, "spec.rds"))
+}
+
+
+###
+# rij_amph <- readRDS(here("data/intermediate/", data_resolution, "rij_amph.rds"))
+# rij_bird <- readRDS(here("data/intermediate/", data_resolution, "rij_bird.rds"))
+# rij_mamm <- readRDS(here("data/intermediate/", data_resolution, "rij_mamm.rds"))
+# rij_rept <- readRDS(here("data/intermediate/", data_resolution, "rij_rept.rds"))
+# 
+# rij <- rbind(rij_amph, rij_bird, rij_mamm, rij_rept)
+
+#for testing
+# rij <- rij_amph
+
+wb_mean <- raster(here("data/intermediate/", data_resolution, "wb_mean.tif"))
+lands <- raster(here("data/intermediate/", data_resolution, "kehoe_land_system.tif"))
+# clim_grid_ann <- raster(here("data/intermediate/", data_resolution, "probability-annual-iucn.tif"))
+clim <- raster(here("data/intermediate/", data_resolution, "climate_frank_ehe.tif"))
+###
+# only keep values that are present in all 3 threat layers
+###
+
+cdf <- as.data.frame(stack(pu, wb_mean, lands, clim))
+cdf_red <- cdf[!is.na(cdf$land), ]
+keep <- !is.na(rowSums(cdf_red))
+
+rij_mat <- as(rij, "TsparseMatrix")
+rij_mat_red <- rij_mat[, keep]
+rij_mat_use <- as(rij_mat_red, "dgCMatrix")
+
+wb_val <- wb_mean[][!is.na(pu[])]
+wb_val_red <- wb_val[keep]
+wb_val_red <- (wb_val_red + min(wb_val_red)) * -1
+
+lands_val <- lands[][!is.na(pu[])]
+lands_val_red <- lands_val[keep]
+lands_val_red <- (lands_val_red - 100) * -1
+
+clim_val <- clim[][!is.na(pu[])]
+clim_val_red <- clim_val[keep]
+clim_val_red <- ((clim_val_red - min(clim_val_red)) * 100) + 0.01
+
+locked_in_red <- locked_in[keep]
+
+cost <- rbind(matrix(wb_val_red, nrow = 1),
+              matrix(lands_val_red, nrow = 1),
+              matrix(clim_val_red, nrow = 1),
+              matrix(rep(1, length(wb_val_red)), nrow = 1)
+)
+
+
+
+runs <- expand.grid(wb = 0:1,
+                    lu = 0:1,
+                    cl = 0:1,
+                    ar = 1, 
+                    flip_priority = FALSE,
+                    target = c(0.1, 0.2, 0.4),
+                    gap = 0.05)
+
+runs_dir <- here("data", "final", data_resolution, "sensitivity")
+# gap <- 0.1
+# 
+# flip_priority <- FALSE
+gc()
+
+
+runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %dopar% {
+  library(raster)
+  library(tidyverse)
+  library(magrittr)
+  library(foreach)
+  library(doParallel)
+  library(prioritizr)
+  library(here)
+  
+  r <- runs[run, ]
+  
+  # Start the loop from index >1
+  # if(run < 8) return(NULL)
+  
+  str_glue_data(r, "Run ", run, 
+                ": wb {wb}; lu {lu}; cl {cl}; ar {ar}; target {target}; gap {gap}; flip {flip_priority}") %>% 
+    message()
+  
+  cost_temp <- cost[c(r$wb, r$lu * 2, r$cl * 3, r$ar * 4),]
+  gap_temp <- rep(r$gap, sum(c(r$wb, r$lu, r$cl, r$ar)))
+  
+  #solve multi objective function
+  s_gur <- multiobjective_prioritization(rij = rij_mat_use,
+                                         obj = cost_temp,
+                                         pu_locked_in = locked_in_red,
+                                         relative_target = rep(r$target, nrow(rij)),
+                                         gap = gap_temp,
+                                         flip_priority = r$flip_priority,
+                                         threads = 10)
+  
+  # save solution
+  str_glue_data(r, "rds_run-", sprintf("%03d", run), "_s-target_{target}-{wb}{lu}{cl}{ar}",
+                "_gap-{gap}_flp-{flip_priority}.rds") %>%
+    file.path(runs_dir, .) %>%
+    saveRDS(s_gur, .)
+  
+  rs1 <- raster(pu)
+  rs1_val <- rs1[][!is.na(pu[])]
+  
+  rs1_val_red <- s_gur$solution
+  rs1_val[keep] <- rs1_val_red
+  rs1[][!is.na(pu[])] <- rs1_val
+  
+  str_glue_data(r, "solution_run-", sprintf("%03d", run), "_s-target_{target}-{wb}{lu}{cl}{ar}",
+                "_gap-{gap}_flp-{flip_priority}.tif") %>% 
+    file.path(runs_dir, .) %>% 
+    writeRaster(rs1, overwrite = TRUE, .)
+  
+  rm(cost_temp, gap_temp, s_gur, rs1)
+  r
+  
+}
+
+
+##########
+## Post Processing
+##########
+substrRight <- function(x, n){
+  substr(x, nchar(x)-n+1, nchar(x))
+}
+
+land <- raster(here("data/intermediate/", data_resolution, "land.tif"))
+land_area <- sum(land[], na.rm = TRUE) * prod(res(land))/1000000 /1000000
+
+
+fls <- list.files(runs_dir, pattern = "*.tif$", full.names = TRUE)[1:16]
+nms <- gsub(".tif", "", fls) %>% 
+  gsub(runs_dir, "", .)
+
+nms2 <- sprintf("SLCA_%s_%s",substring(nms, 7, 10), c(rep("F", 8), rep("T", 8)))
+
+#gap 0.05 and flip == FALSE only
+r_stack <- stack(fls)
+names(r_stack) <- nms2
+
+
+
+r_df <- as.data.frame(r_stack)
+
+prot <- sum(locked_in_red) * dr / 1000000
+(selected <- colSums(r_df, na.rm = TRUE) * dr /1000000)
+selected - prot
+
+(perc_tot <- round(selected/land_area * 100, 2))
+
+(perc_no_prot <- round((selected - prot)/land_area * 100, 2))
+
+(perc_increse <- perc_tot - prot/land_area*100)
+
+data.frame(t(data.frame(perc_tot = round(perc_tot, 2),
+                        perc_increse = round(perc_increse, 2)))) %>%
+  write.csv(paste0(runs_dir, "/Table1.csv"))
+
+# ss <- sum(r_stack)
+# tt <-table(round(ss[],0))
+# tt[10] <- tt[9] - sum(locked_in_red)
+# names(tt)[10] <- "8-prot"
+# tt
+# 
+# writeRaster(r_stack, here("data/final/", data_resolution,"solution.tif"), bylayer = TRUE, suffix = 'names')
+
+
+######
+# Summarise by land use type? (maybe using Scott's simplified categories)
+# summarise by country and report averages?
+
+gadm_df <- read_csv(here("data/intermediate/", data_resolution, "gadm_country_tbl.csv")) %>%
+  select(NAME_IDX, GID_0, NAME_0)
+
+gadm_country <- raster(here("data/intermediate/", data_resolution, "gadm_country.tif"))
+
+count_stack <- stack(gadm_country, r_stack)
+count_df <- as.data.frame(count_stack) %>% drop_na() 
+
+count_df %<>% left_join(gadm_df, by = c("gadm_country" = "NAME_IDX"))
+
+count_sum <- count_df %>% group_by(NAME_0)  %>% summarise_at(2:(ncol(count_df)-2), list(sum = sum))
+
+count_sum_t <- data.frame(t(as.data.frame(count_sum   )), stringsAsFactors = FALSE)
+colnames(count_sum_t) <- as.character(unlist(count_sum_t[1,]))
+count_sum_t <- count_sum_t[-1, ]
+rwnms <- row.names(count_sum_t)
+count_sum_t <- mutate_all(count_sum_t, function(x) as.numeric(as.character(x)))
+row.names(count_sum_t) <- rwnms
+# %>% tally()
+
+count_sum_t %>% write.csv(paste0(runs_dir, "/country_summaries.csv"))
+
+# clean up
+# stopCluster(cl)
+
+count_sum_2 <- data.frame(mapply('/', count_sum_t, count_sum_t[1,])[2:8,])
+row.names(count_sum_2) <- rwnms[2:8]
+
+is.na(count_sum_2) <- sapply(count_sum_2, is.infinite)
+count_sum_2[is.na(count_sum_2)] <- NA
+
+count_sum_2 %>% 
+  write.csv(paste0(runs_dir, "/Table2_detail.csv"))
+
+c_sum_tab <- data.frame(scenario = row.names(count_sum_2),
+                        mean = apply(count_sum_2, 1, function(x) mean(x, na.rm = TRUE)),
+                        min = apply(count_sum_2, 1, function(x) min(x, na.rm = TRUE)),
+                        max = apply(count_sum_2, 1, function(x) max(x, na.rm = TRUE)),
+                        low = apply(count_sum_2, 1, function(x) quantile(x, prob = 0.05, na.rm = TRUE)),
+                        high = apply(count_sum_2, 1, function(x) quantile(x, prob = 0.95, na.rm = TRUE)))
+
+c_sum_tab %>% 
+write.csv(paste0(runs_dir, "/Table2.csv"), row.names = FALSE)
