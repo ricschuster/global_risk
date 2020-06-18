@@ -13,9 +13,9 @@ library(here)
 ## Define functions
 source(here("code/R/functions/multi-objective-prioritization.R"))
 # parallelization
-n_cores <- 4
-cl <- makeCluster(n_cores)
-registerDoParallel(cl)
+# n_cores <- 4
+# cl <- makeCluster(n_cores)
+# registerDoParallel(cl)
 
 dr <- 100
 data_resolution <- paste0(dr, "km2")
@@ -115,7 +115,7 @@ runs <- expand.grid(wb = 0:1,
                     cl = 0:1,
                     ar = 1, 
                     flip_priority = FALSE,
-                    target = c(0.1, 0.2, 0.4),
+                    target = 0.4,
                     gap = 0.05)
 
 runs_dir <- here("data", "final", data_resolution, "sensitivity")
@@ -125,7 +125,7 @@ runs_dir <- here("data", "final", data_resolution, "sensitivity")
 gc()
 
 
-runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %dopar% {
+runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %do% {
   library(raster)
   library(tidyverse)
   library(magrittr)
@@ -153,7 +153,7 @@ runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %dopar% {
                                          relative_target = rep(r$target, nrow(rij)),
                                          gap = gap_temp,
                                          flip_priority = r$flip_priority,
-                                         threads = 10)
+                                         threads = detectCores() - 3)
   
   # save solution
   str_glue_data(r, "rds_run-", sprintf("%03d", run), "_s-target_{target}-{wb}{lu}{cl}{ar}",
