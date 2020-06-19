@@ -115,7 +115,7 @@ runs <- expand.grid(wb = 0:1,
                     cl = 0:1,
                     ar = 1, 
                     flip_priority = FALSE,
-                    target = 0.4,
+                    target = 0.2,
                     gap = 0.05)
 
 runs_dir <- here("data", "final", data_resolution, "sensitivity")
