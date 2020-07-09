@@ -12,6 +12,8 @@ library(here)
 
 ## Define functions
 source(here("code/R/functions/multi-objective-prioritization.R"))
+source(here("code/R/functions/perm.R"))
+ 
 # parallelization
 # n_cores <- 2
 # cl <- makeCluster(n_cores)
@@ -108,14 +110,26 @@ cost <- rbind(matrix(wb_val_red, nrow = 1),
               matrix(rep(1, length(wb_val_red)), nrow = 1)
 )
 
+runs <- tibble(name = list(c("S", "L", "C", "A")),
+               scen = list(4,
+                           1,
+                           2,
+                           3,
+                           c(1,2),
+                           c(2,1),
+                           c(1,3),
+                           c(3,1),
+                           c(2,3),
+                           c(3,2),
+                           c(1,2,3),
+                           c(1,3,2),
+                           c(2,1,3),
+                           c(2,3,1),
+                           c(3,1,2),
+                           c(3,2,1)),
+               flip_priority = FALSE,
+               gap = rep(0.05, 16))
 
-
-runs <- expand.grid(wb = 0:1,
-                    lu = 0:1,
-                    cl = 0:1,
-                    ar = 1, 
-                    flip_priority = c(FALSE, TRUE),
-                    gap = 0.05)
 
 runs_dir <- here("data", "final", data_resolution)
 # gap <- 0.1
@@ -124,16 +138,17 @@ runs_dir <- here("data", "final", data_resolution)
 
 runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %do% {
   r <- runs[run, ]
+  r$name_out <- paste(r$name[[1]][r$scen[[1]]], collapse = "")
   
   # Start the loop from index >1
   # if(run < 8) return(NULL)
+  # paste(r$name[[1]][r$scen[[1]]], collapse = "")
   
-  str_glue_data(r, "Run ", run, 
-                ": wb {wb}; lu {lu}; cl {cl}; ar {ar}; gap {gap}; flip {flip_priority}") %>% 
+  sprintf("Run : %s", paste(r$name[[1]][r$scen[[1]]], collapse = "")) %>% 
     message()
   
-  cost_temp <- cost[c(r$wb, r$lu * 2, r$cl * 3, r$ar * 4),]
-  gap_temp <- rep(r$gap, sum(c(r$wb, r$lu, r$cl, r$ar)))
+  cost_temp <- cost[r$scen[[1]],]
+  gap_temp <- rep(r$gap, length(r$scen[[1]]))
   
   #solve multi objective function
   s_gur <- multiobjective_prioritization(rij = rij_mat_use,
@@ -145,8 +160,8 @@ runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %do% {
                                          threads = parallel::detectCores() - 6)
   
   # save solution
-  str_glue_data(r, "rds_run-", sprintf("%03d", run), "_s-{wb}{lu}{cl}{ar}",
-                "_gap-{gap}_flp-{flip_priority}.rds") %>%
+  str_glue_data(r, "rds_run-", sprintf("%03d", run), "_s-{name_out}",
+                "_gap-{gap}.rds") %>%
     file.path(runs_dir, .) %>%
     saveRDS(s_gur, .)
   
@@ -157,8 +172,8 @@ runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %do% {
   rs1_val[keep] <- rs1_val_red
   rs1[][!is.na(pu[])] <- rs1_val
   
-  str_glue_data(r, "solution_run-", sprintf("%03d", run), "_s-{wb}{lu}{cl}{ar}",
-                "_gap-{gap}_flp-{flip_priority}.tif") %>% 
+  str_glue_data(r, "solution_run-", sprintf("%03d", run), "_s-{name_out}",
+                "_gap-{gap}.tif") %>% 
     file.path(runs_dir, .) %>% 
     writeRaster(rs1, overwrite = TRUE, .)
   
