@@ -15,9 +15,9 @@ source(here("code/R/functions/multi-objective-prioritization.R"))
 source(here("code/R/functions/perm.R"))
  
 # parallelization
-n_cores <- 2
-cl <- makeCluster(n_cores)
-registerDoParallel(cl)
+# n_cores <- 2
+# cl <- makeCluster(n_cores)
+# registerDoParallel(cl)
 
 dr <- 100
 data_resolution <- paste0(dr, "km2")
@@ -136,17 +136,8 @@ runs_dir <- here("data", "final", data_resolution)
 # 
 # flip_priority <- FALSE
 
-runs <- foreach(run = seq_len(nrow(runs)), .combine = bind_rows) %dopar% {
-  library(raster)
-  library(tidyverse)
-  library(magrittr)
-  library(foreach)
-  library(doParallel)
-  library(prioritizr)
-  # setwd("E:/Richard/global_risk/")
-  # setwd("D:/Work/Papers/2019_global_risk/global_risk/")
-  library(here)
-  
+runs <- foreach(run = 12:nrow(runs), .combine = bind_rows) %do% {
+
   r <- runs[run, ]
   r$name_out <- paste(r$name[[1]][r$scen[[1]]], collapse = "")
   
