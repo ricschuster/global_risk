@@ -4,6 +4,7 @@ library(magrittr)
 library(foreach)
 library(doParallel)
 library(prioritizr)
+library(Rfast)
 # setwd("E:/Richard/global_risk/")
  setwd("D:/Work/Papers/2019_global_risk/global_risk/")
 library(here)
@@ -200,7 +201,7 @@ fls <- list.files(here("data/final/", data_resolution), pattern = "*.tif$", full
 nms <- gsub(".tif", "", fls) %>% 
   gsub(here("data/final/", data_resolution,"solution_run-"), "", .)
 
-nms2 <- sprintf("SLCA_%s_%s",substring(nms, 7, 10), c(rep("F", 8), rep("T", 8)))
+nms2 <- str_split(gsub("_gap-0.1", "", nms), "_s-", simplify = T)[,2]
 
 #gap 0.05 and flip == FALSE only
 r_stack <- stack(fls)
@@ -252,7 +253,8 @@ count_sum <- count_df %>% group_by(NAME_0)  %>% summarise_at(2:(ncol(count_df)-2
 count_sum_t <- data.frame(t(as.data.frame(count_sum   )), stringsAsFactors = FALSE)
 colnames(count_sum_t) <- as.character(unlist(count_sum_t[1,]))
 count_sum_t <- count_sum_t[-1, ]
-rwnms <- row.names(count_sum_t)
+rwnms <- row.names(count_sum_t) %>%
+  gsub("_sum", "", .)
 count_sum_t <- mutate_all(count_sum_t, function(x) as.numeric(as.character(x)))
 row.names(count_sum_t) <- rwnms
 # %>% tally()
@@ -262,8 +264,8 @@ count_sum_t %>% write.csv(here("data/final/", data_resolution, "country_summarie
 # clean up
 # stopCluster(cl)
 
-count_sum_2 <- data.frame(mapply('/', count_sum_t, count_sum_t[1,])[2:8,])
-row.names(count_sum_2) <- rwnms[2:8]
+count_sum_2 <- data.frame(mapply('/', count_sum_t, count_sum_t[1,])[2:nrow(count_sum_t),])
+row.names(count_sum_2) <- rwnms[2:nrow(count_sum_t)]
 
 is.na(count_sum_2) <- sapply(count_sum_2, is.infinite)
 count_sum_2[is.na(count_sum_2)] <- NA
@@ -280,3 +282,28 @@ c_sum_tab <- data.frame(scenario = row.names(count_sum_2),
 
 c_sum_tab %>% 
 write.csv(here("data/final/", data_resolution, "Table2.csv"), row.names = FALSE)
+
+
+rng <- colMaxs(as.matrix(count_sum_2), value = T) - colMins(as.matrix(count_sum_2), value = T)
+rng <- tibble(NAME_0 = colnames(count_sum_2), rng = rng)
+
+count_df2 <- count_df %>% 
+  mutate(name = NAME_0, 
+         NAME_0 = make.names(NAME_0),
+         governance = cost[1,] / max(cost[1,]),
+         landsys = cost[2,] / max(cost[2,]),
+         climate = cost[3,] / max(cost[3,])) %>%
+  left_join(rng, by = "NAME_0")
+
+count_df3 <- subset(count_df2, 
+              subset = !duplicated(count_df2[c("gadm_country")]),
+              select = c("gadm_country", "name", "rng")) %>%
+  arrange(name)
+
+
+gadm_country2 <- gadm_country 
+gadm_df <- data.frame(gadm_country = values(gadm_country2)) %>%
+  left_join(count_df3, by = "gadm_country")
+gadm_country2[] <- gadm_df$rng
+
+

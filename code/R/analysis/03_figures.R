@@ -5,7 +5,7 @@ library(raster)
 library(magrittr)
 library(stringr)
 library(RColorBrewer)
-
+library(classInt)
 
 #land
 land <- st_as_sf(ne_download(scale = 50, type = 'land', category = 'physical'))
@@ -16,15 +16,15 @@ wdpa <- raster(here("data/intermediate/100km2/", "wdpa_terrestrial.tif"))
 
 fls <- list.files(here("data/final/100km2/"), pattern = ".tif$", full.names = TRUE)
 
-out_r <- stack(fls[1:8])
+out_r <- stack(fls[2:length(fls)])
 
 nms <- names(out_r) %>% gsub("solution_run.", "", .) %>%
-  gsub("_gap.0.05_flp.FALSE", "", .) %>%
+  gsub("_gap.0.1", "", .) %>%
   str_split(pattern =  "_s.", simplify = TRUE)
 
 nms <- nms[,2]
 
-names(out_r) <- paste0("SLCA_", nms)
+names(out_r) <- nms
 
 land <- st_transform(land, crs = proj4string(out_r))
 countries <- st_transform(countries, crs = proj4string(out_r))
@@ -34,14 +34,14 @@ countries <- st_transform(countries, crs = proj4string(out_r))
 here("manuscript/figures", paste0("Figure 1", ".png")) %>%
   png(width = 4000, height = 4000, res = 600)
 
-old.par <- par(mfrow=c(4,2))
+old.par <- par(mfrow=c(4,4))
 par(mar = c(0.1, 0.1, 0.1, 0.1), oma = c(0,3.5,1.5,0), bg = "white")
 
 for (ii in 1:nlayers(out_r)) {
   # print map
   plot(land$geometry, col = "grey", border = NA)
   # title(names(out_r)[ii], cex.main = 1.5)
-
+  
   plot(out_r[[ii]], add = TRUE, col = c(rgb(0,0,0,alpha=0), "#8c510a"), legend = FALSE, 
        maxpixels = ncell(out_r))
   
@@ -114,4 +114,41 @@ plot(countries$geometry, col = NA, lwd = 0.5, add = TRUE)
 
 
 dev.off()
+# 
+
+
+# F3
+
+here("manuscript/figures", paste0("Figure 3", ".png")) %>%
+  png(width = 3600 * 4, height = 2000 * 4, res = 500)
+
+par(mfrow=c(1, 1))
+
+plot(land$geometry, col = "grey", border = NA)
+# 
+pal <- brewer.pal(9, 'YlGnBu')
+pal <- colorRampPalette(pal)
+
+breaks <- classIntervals(gadm_country2[!is.na(gadm_country2)], n = 10, style = "kmeans")
+
+# levelplot(gadm_country2, at = breaks$brks, col.regions = colorRampPalette(brewer.pal(9, 'YlOrRd')),
+#           margin=FALSE)
+
+plot(gadm_country2, add = TRUE, col = pal(10), breaks = breaks$brks,
+     maxpixels = ncell(gadm_country2))
+
+# plot(wdpa, add = TRUE, col = "#01665e", legend = FALSE)
+# if(lh[[ii]]){
+#   add_legend("", pal, legend_offsets[3], low_high = lh[ii],
+#              text_col = text_col)
+# }
+
+# boundaries
+plot(countries$geometry, col = NA, lwd = 0.5, add = TRUE)
+
+
+dev.off()
+
+
+
 # 
