@@ -5,6 +5,7 @@ library(foreach)
 library(doParallel)
 library(prioritizr)
 library(Rfast)
+library(ggpubr)
 # setwd("E:/Richard/global_risk/")
 setwd("D:/Work/Papers/2019_global_risk/global_risk/")
 library(here)
@@ -317,6 +318,23 @@ gg_df <- count_df2 %>%
     count_df2 %>%
       group_by(name) %>%
       summarise_at(vars(c(A:CLS)), sum),
-    by='name' )
+    by='name' ) %>%
+  mutate(SA = S/A,
+         LA = L/A,
+         CA= C/A)
+
+gs <- ggplot(gg_df, aes(x = governance, y = SA)) +
+  geom_point(size=2)
+
+
+gl <- ggplot(gg_df, aes(x = landsys, y = LA)) +
+  geom_point(size=2)
+
+gc <- ggplot(gg_df, aes(x = climate, y = CA)) +
+  geom_point(size=2)
+
+ggarrange(gs, gl, gc, ncol = 1, nrow = 3) %>%
+  ggexport(filename = here("manuscript/figures", paste0("Figure 4", ".png")),
+           width = 3600 * 2, height = 2000 * 2, res = 400)
 
 
