@@ -324,17 +324,21 @@ gg_df <- count_df2 %>%
          CA= C/A)
 
 gs <- ggplot(gg_df, aes(x = governance, y = SA)) +
-  geom_point(size=2)
+  geom_point(size = 1) +
+  geom_smooth(method = "lm")
 
 
 gl <- ggplot(gg_df, aes(x = landsys, y = LA)) +
-  geom_point(size=2)
+  geom_point(size = 1) +
+  geom_smooth(method = "lm")
 
 gc <- ggplot(gg_df, aes(x = climate, y = CA)) +
-  geom_point(size=2)
+  geom_point(size = 1) +
+  geom_smooth(method = "lm")
 
 ggarrange(gs, gl, gc, ncol = 1, nrow = 3) %>%
   ggexport(filename = here("manuscript/figures", paste0("Figure 4", ".png")),
-           width = 3600 * 2, height = 2000 * 2, res = 400)
+           width = 2500 , height = 4000 , res = 400)
 
-
+is.na(gg_df) <- sapply(gg_df, is.infinite)
+gg_df[is.na(gg_df)] <- NA
