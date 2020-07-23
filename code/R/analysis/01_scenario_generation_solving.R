@@ -6,7 +6,7 @@ library(doParallel)
 library(prioritizr)
 library(Rfast)
 # setwd("E:/Richard/global_risk/")
- setwd("D:/Work/Papers/2019_global_risk/global_risk/")
+setwd("D:/Work/Papers/2019_global_risk/global_risk/")
 library(here)
 #library(SparseData)
 # memory.limit(300000)
@@ -14,7 +14,7 @@ library(here)
 ## Define functions
 source(here("code/R/functions/multi-objective-prioritization.R"))
 source(here("code/R/functions/perm.R"))
- 
+
 # parallelization
 # n_cores <- 2
 # cl <- makeCluster(n_cores)
@@ -138,8 +138,8 @@ runs_dir <- here("data", "final", data_resolution)
 # flip_priority <- FALSE
 runs <- foreach(run = 1:8, .combine = bind_rows) %do% {
   
-# runs <- foreach(run = 12:nrow(runs), .combine = bind_rows) %do% {
-
+  # runs <- foreach(run = 12:nrow(runs), .combine = bind_rows) %do% {
+  
   r <- runs[run, ]
   r$name_out <- paste(r$name[[1]][r$scen[[1]]], collapse = "")
   
@@ -281,7 +281,7 @@ c_sum_tab <- data.frame(scenario = row.names(count_sum_2),
                         high = apply(count_sum_2, 1, function(x) quantile(x, prob = 0.95, na.rm = TRUE)))
 
 c_sum_tab %>% 
-write.csv(here("data/final/", data_resolution, "Table2.csv"), row.names = FALSE)
+  write.csv(here("data/final/", data_resolution, "Table2.csv"), row.names = FALSE)
 
 
 rng <- colMaxs(as.matrix(count_sum_2), value = T) - colMins(as.matrix(count_sum_2), value = T)
@@ -296,8 +296,8 @@ count_df2 <- count_df %>%
   left_join(rng, by = "NAME_0")
 
 count_df3 <- subset(count_df2, 
-              subset = !duplicated(count_df2[c("gadm_country")]),
-              select = c("gadm_country", "name", "rng")) %>%
+                    subset = !duplicated(count_df2[c("gadm_country")]),
+                    select = c("gadm_country", "name", "rng")) %>%
   arrange(name)
 
 
@@ -305,5 +305,18 @@ gadm_country2 <- gadm_country
 gadm_df <- data.frame(gadm_country = values(gadm_country2)) %>%
   left_join(count_df3, by = "gadm_country")
 gadm_country2[] <- gadm_df$rng
+
+
+gg_df <- count_df2 %>%
+  group_by(name) %>%
+  summarise(cells = sum(!is.na(A)),
+            governance = mean(governance, na.rm = T),
+            landsys = mean(landsys, na.rm = T),
+            climate = mean(climate, na.rm = T)) %>%
+  inner_join( 
+    count_df2 %>%
+      group_by(name) %>%
+      summarise_at(vars(c(A:CLS)), sum),
+    by='name' )
 
 
