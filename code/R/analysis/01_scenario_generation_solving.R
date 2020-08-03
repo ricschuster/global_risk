@@ -342,3 +342,59 @@ ggarrange(gs, gl, gc, ncol = 1, nrow = 3) %>%
 
 is.na(gg_df) <- sapply(gg_df, is.infinite)
 gg_df[is.na(gg_df)] <- NA
+
+
+#############################################################################
+#Fig3 without PA's
+wdpa[is.na(wdpa)] <- 0
+
+count_stack <- stack(gadm_country, r_stack, wdpa)
+count_df <- as.data.frame(count_stack) %>% drop_na() 
+
+count_df %<>% left_join(gadm_df, by = c("gadm_country" = "NAME_IDX"))
+
+count_sum <- count_df %>% group_by(NAME_0)  %>% summarise_at(2:(ncol(count_df)-2), list(sum = sum))
+
+count_sum_t <- data.frame(t(as.data.frame(count_sum   )), stringsAsFactors = FALSE)
+colnames(count_sum_t) <- as.character(unlist(count_sum_t[1,]))
+count_sum_t <- count_sum_t[-1, ]
+rwnms <- row.names(count_sum_t) %>%
+  gsub("_sum", "", .)
+count_sum_t <- mutate_all(count_sum_t, function(x) as.numeric(as.character(x)))
+row.names(count_sum_t) <- rwnms
+# %>% tally()
+
+for(ii in 1:16){
+  count_sum_t[ii,] <-  count_sum_t[ii,] - count_sum_t[17,]
+}
+
+
+count_sum_2 <- data.frame(mapply('/', count_sum_t, count_sum_t[1,])[2:nrow(count_sum_t) -1 ,])
+row.names(count_sum_2) <- rwnms[2:nrow(count_sum_t)]
+
+is.na(count_sum_2) <- sapply(count_sum_2, is.infinite)
+count_sum_2[is.na(count_sum_2)] <- NA
+
+rng <- colMaxs(as.matrix(count_sum_2), value = T) - colMins(as.matrix(count_sum_2), value = T)
+rng <- tibble(NAME_0 = colnames(count_sum_2), rng = rng)
+
+count_df2 <- count_df %>% 
+  mutate(name = NAME_0, 
+         NAME_0 = make.names(NAME_0),
+         governance = cost[1,] / max(cost[1,]),
+         landsys = cost[2,] / max(cost[2,]),
+         climate = cost[3,] / max(cost[3,])) %>%
+  left_join(rng, by = "NAME_0")
+
+count_df3 <- subset(count_df2, 
+                    subset = !duplicated(count_df2[c("gadm_country")]),
+                    select = c("gadm_country", "name", "rng")) %>%
+  arrange(name)
+
+
+gadm_country2 <- gadm_country 
+gadm_df <- data.frame(gadm_country = values(gadm_country2)) %>%
+  left_join(count_df3, by = "gadm_country")
+gadm_country2[] <- gadm_df$rng
+
+
