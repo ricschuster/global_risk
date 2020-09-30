@@ -6,6 +6,7 @@ library(doParallel)
 library(prioritizr)
 library(Rfast)
 library(ggpubr)
+library(fasterize)
 # setwd("E:/Richard/global_risk/")
 setwd("D:/Work/Papers/2019_global_risk/global_risk/")
 library(here)
@@ -235,6 +236,27 @@ sum_tab[length(sum_tab) + 1] <- sum_tab[length(sum_tab)] - sum(locked_in_red)
 names(sum_tab)[length(sum_tab)] <- "15-prot"
 
 round(sum_tab * 100 / (land_area * 1000000) * 100, 2)[-15]
+
+
+#biodiversity hotspot overlap
+dr <- 100
+data_resolution <- paste0(dr, "km2")
+
+trm <- raster(here("data/raw/IUCN/richness_10km_Birds_v7_spp_edited_tax_extant_1m_dense_EckertIV_1m_dissolved_Passeriformes_raster2.tif"))
+base_raster <- raster(trm) 
+res(base_raster) <- sqrt(dr) * 1000
+
+hotsp <- st_read(here("data/raw/Biod/hotspots_2016_1.shp")) %>%
+  filter(Type == "hotspot area")
+hotsp %<>% st_transform(crs = crs(base_raster))
+hotsp$one <- 1
+
+hotsp_rast <- fasterize(hotsp, base_raster, field = "one")
+
+sel_10 <- out_sum > 10
+sel_10_no_prot <- sum(stack(sel_10, wdpa*10), na.rm = TRUE) ==1
+
+tbl_hotsp <- table(sum(stack(sel_10_no_prot, hotsp_rast * 10), na.rm = TRUE)[])
 
 # ss <- sum(r_stack)
 # tt <-table(round(ss[],0))
