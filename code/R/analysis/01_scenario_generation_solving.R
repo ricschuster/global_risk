@@ -226,6 +226,16 @@ data.frame(t(data.frame(perc_tot = round(perc_tot, 2),
                         perc_increse = round(perc_increse, 2)))) %>%
   write.csv(here("data/final/", data_resolution, "Table1.csv"))
 
+
+out_sum <- sum(r_stack[[-1]])
+values(out_sum)[values(out_sum) == 0] <-  NA
+
+sum_tab <- table(out_sum[])
+sum_tab[length(sum_tab) + 1] <- sum_tab[length(sum_tab)] - sum(locked_in_red)
+names(sum_tab)[length(sum_tab)] <- "15-prot"
+
+round(sum_tab * 100 / (land_area * 1000000) * 100, 2)[-15]
+
 # ss <- sum(r_stack)
 # tt <-table(round(ss[],0))
 # tt[10] <- tt[9] - sum(locked_in_red)
