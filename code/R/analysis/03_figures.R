@@ -122,20 +122,41 @@ dev.off()
 here("manuscript/figures", paste0("Figure 3", ".png")) %>%
   png(width = 3600 * 4, height = 2000 * 4, res = 500)
 
-par(mfrow=c(1, 1))
+par(mfrow=c(1, 1),
+    mar = c(0, 0, 0, 0),
+    cex = 2,
+    xpd=TRUE)
 
 plot(land$geometry, col = "grey", border = NA)
 # 
 pal <- brewer.pal(9, 'YlGnBu')
 pal <- colorRampPalette(pal)
 
+gadm_country2 <- round(gadm_country2, 2)
 breaks <- classIntervals(gadm_country2[!is.na(gadm_country2)], n = 10, style = "kmeans")
 
 # levelplot(gadm_country2, at = breaks$brks, col.regions = colorRampPalette(brewer.pal(9, 'YlOrRd')),
 #           margin=FALSE)
 
 plot(gadm_country2, add = TRUE, col = pal(10), breaks = breaks$brks,
-     maxpixels = ncell(gadm_country2))
+     maxpixels = ncell(gadm_country2), legend = FALSE)
+
+plot(countries$geometry, col = NA, lwd = 0.5, add = TRUE)
+
+plot(gadm_country2, legend.only=TRUE, col = pal(10),
+     breaks = round(breaks$brks,2),
+     # legend.width = 1, legend.shrink = 0.75,
+     smallplot=c(0.17, 0.18, 0.15, 0.55),
+     axis.args=list(#at=seq(r.range[1], r.range[2], 25),
+                    #labels=seq(r.range[1], r.range[2], 25),
+                    cex.axis = 2),
+     legend.args=list(text='Result variability', side = 2, font=2, line=2.5, cex= 2))
+
+# require(raster)
+# data(volcano)
+# r <- raster(volcano)
+# plot(r, col=topo.colors(100), legend=FALSE, axes=FALSE)
+# r.range <- c(minValue(r), maxValue(r))
 
 # plot(wdpa, add = TRUE, col = "#01665e", legend = FALSE)
 # if(lh[[ii]]){
@@ -144,7 +165,7 @@ plot(gadm_country2, add = TRUE, col = pal(10), breaks = breaks$brks,
 # }
 
 # boundaries
-plot(countries$geometry, col = NA, lwd = 0.5, add = TRUE)
+# plot(countries$geometry, col = NA, lwd = 0.5, add = TRUE)
 
 
 dev.off()

@@ -297,7 +297,7 @@ count_sum_t %>% write.csv(here("data/final/", data_resolution, "country_summarie
 n_cell_count <- count_df %>% group_by(NAME_0) %>% summarise(n=n())
 
 round(t(t(count_sum_t) / n_cell_count$n * 100), 2) %>%
-  write.csv(here("data/final/", data_resolution, "country_summaries.csv"))
+  write.csv(here("data/final/", data_resolution, "country_summaries_perc.csv"))
 
 
 # clean up
