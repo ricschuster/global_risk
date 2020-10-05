@@ -359,24 +359,34 @@ gg_df <- count_df2 %>%
     by='name' ) %>%
   mutate(SA = S/A,
          LA = L/A,
-         CA= C/A)
+         CA= C/A) 
+#remove NAN and inf
 
 gs <- ggplot(gg_df, aes(x = governance, y = SA)) +
   geom_point(size = 1) +
+  theme_classic() +
+  xlab("Governance") + 
+  ylab("something") + 
   geom_smooth(method = "lm")
 
 
 gl <- ggplot(gg_df, aes(x = landsys, y = LA)) +
   geom_point(size = 1) +
+  theme_classic() +
+  xlab("Land systems") + 
+  ylab("") + 
   geom_smooth(method = "lm")
 
 gc <- ggplot(gg_df, aes(x = climate, y = CA)) +
   geom_point(size = 1) +
+  theme_classic() +
+  xlab("Climate") + 
+  ylab("") + 
   geom_smooth(method = "lm")
 
-ggarrange(gs, gl, gc, ncol = 1, nrow = 3) %>%
+ggarrange(gs, gl, gc, ncol = 3, nrow = 1) %>%
   ggexport(filename = here("manuscript/figures", paste0("Figure 4", ".png")),
-           width = 2500 , height = 4000 , res = 400)
+           width = 2500 , height = 1000 , res = 400)
 
 is.na(gg_df) <- sapply(gg_df, is.infinite)
 gg_df[is.na(gg_df)] <- NA
