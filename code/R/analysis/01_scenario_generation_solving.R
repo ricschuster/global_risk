@@ -359,14 +359,15 @@ gg_df <- count_df2 %>%
     by='name' ) %>%
   mutate(SA = S/A,
          LA = L/A,
-         CA= C/A) 
+         CA= C/A) %>%
+  filter(is.finite(SA))
 #remove NAN and inf
 
 gs <- ggplot(gg_df, aes(x = governance, y = SA)) +
   geom_point(size = 1) +
   theme_classic() +
   xlab("Governance") + 
-  ylab("something") + 
+  ylab("Result variability") + 
   geom_smooth(method = "lm")
 
 
