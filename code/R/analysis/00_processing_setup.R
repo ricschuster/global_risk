@@ -276,7 +276,7 @@ frank_novel %>%   projectRaster(crs = proj4string(base_raster), method = "ngb") 
   resample(base_raster, method = "ngb") %>%
   writeRaster(here("data/intermediate/", data_resolution, "climate_frank_novel.tif"), format = "GTiff", overwrite = TRUE)
 
-frank_ehe <- raster(here("data/raw/Climate/EHE_proportion-trend.tif"))
+frank_ehe <- raster(here("data/raw/Climate/ehe-prop-betareg.tif"))
 land <- raster(here("data/intermediate/", data_resolution, "land.tif"))
 
 frank_ehe <- frank_ehe %>%   projectRaster(crs = proj4string(base_raster), method = "ngb") %>%
