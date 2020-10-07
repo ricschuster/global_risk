@@ -138,9 +138,7 @@ runs_dir <- here("data", "final", data_resolution)
 # gap <- 0.1
 # 
 # flip_priority <- FALSE
-runs <- foreach(run = 1:8, .combine = bind_rows) %do% {
-  
-  # runs <- foreach(run = 12:nrow(runs), .combine = bind_rows) %do% {
+runs <- foreach(run = 1:nrow(runs), .combine = bind_rows) %do% {
   
   r <- runs[run, ]
   r$name_out <- paste(r$name[[1]][r$scen[[1]]], collapse = "")
