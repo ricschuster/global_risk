@@ -6,6 +6,8 @@ library(magrittr)
 library(stringr)
 library(RColorBrewer)
 library(classInt)
+library(tidyverse)
+library(fasterize)
 
 dr <- 100
 data_resolution <- paste0(dr, "km2")
@@ -312,9 +314,46 @@ dev.off()
 #################################################################################################
 #Figure S4
 #################################################################################################
-clim <- raster(here("data/intermediate/", data_resolution, "climate_frank_ehe.tif"))
-clim <- ((clim - min(clim[], na.rm=T)) * 100) + 0.01
+trm <- raster(here("data/raw/IUCN/richness_10km_Birds_v7_spp_edited_tax_extant_1m_dense_EckertIV_1m_dissolved_Passeriformes_raster2.tif"))
+base_raster <- raster(trm) 
+res(base_raster) <- sqrt(dr) * 1000
 
+out_r <- stack(fls[2:length(fls)])
+
+nms <- names(out_r) %>% gsub("solution_run.", "", .) %>%
+  gsub("_gap.0.1", "", .) %>%
+  str_split(pattern =  "_s.", simplify = TRUE)
+nms <- nms[,2]
+names(out_r) <- nms
+
+out_sum <- sum(out_r)
+values(out_sum)[values(out_sum) == 0] <-  NA
+
+wdpa <- raster(here("data/intermediate/", data_resolution, "wdpa_terrestrial.tif"))
+
+hotsp <- st_read(here("data/raw/Biod/hotspots_2016_1.shp")) %>%
+  filter(Type == "hotspot area")
+hotsp %<>% st_transform(crs = crs(base_raster))
+hotsp$one <- 1
+
+hotsp_rast <- fasterize(hotsp[-26,], base_raster, field = "one")
+
+ovlp <- tibble(out_sum = out_sum[],
+               out_sum_10 = ifelse(out_sum > 10, 1, 0),
+               wdpa = wdpa[] * 10,
+               hotsp = hotsp_rast[] * 100,
+               ) %>%
+  mutate(sum = rowSums(.[2:4], na.rm = TRUE),
+         code = recode(sum, `10` = 0, `11` = 0, `100` = 2, `101` = 3, `110` = 2, `111` = 3),
+         code = na_if(code, 0),
+         name = ifelse(code == 1, "Solution", 
+                       ifelse(code == 2, "Hotspot", 
+                              ifelse(code == 3, "Overlap", NA))))
+
+plt_rst <- hotsp_rast
+plt_rst[] <- ovlp$code
+
+my_col = c('#7a0177','#034e7b','#8c510a')
 
 here("manuscript/figures", paste0("Figure S4", ".png")) %>%
   png(width = 3600 * 4, height = 2000 * 4, res = 500)
@@ -329,27 +368,20 @@ plot(land$geometry, col = "grey", border = NA)
 pal <- brewer.pal(9, 'YlOrRd')
 pal <- colorRampPalette(pal)
 
-clim <- round(clim, 2)
-breaks <- classIntervals(clim[!is.na(clim)], n = 10, style = "quantile")
+plot(plt_rst, add = TRUE, legend = FALSE, col = my_col)
 
-# levelplot(gadm_country2, at = breaks$brks, col.regions = colorRampPalette(brewer.pal(9, 'YlOrRd')),
-#           margin=FALSE)
-
-plot(clim, add = TRUE, col = pal(10), breaks = breaks$brks,
-     maxpixels = ncell(clim), legend = FALSE)
 
 plot(countries$geometry, col = NA, lwd = 0.5, add = TRUE)
 
-plot(clim, legend.only=TRUE, col = pal(10),
-     breaks = round(breaks$brks,2),
+plot(plt_rst, legend.only=TRUE, col = my_col,
+     # breaks = round(breaks$brks,2),
      # legend.width = 1, legend.shrink = 0.75,
      smallplot=c(0.17, 0.18, 0.15, 0.55),
-     axis.args=list(#at=seq(r.range[1], r.range[2], 25),
-       #labels=seq(r.range[1], r.range[2], 25),
+     axis.args=list(at=c(1.25, 2, 2.75),
+       labels= c("Scenario agreement (>10)", "Hotspot", "Overlap"),
        cex.axis = 2),
-     legend.args=list(text='Climate risk', side = 2, font=2, line=2.5, cex= 2))
+     legend.args=list(text='', side = 2, font=2, line=2.5, cex= 2))
 
 dev.off()
-
 
 
