@@ -7,6 +7,9 @@ library(stringr)
 library(RColorBrewer)
 library(classInt)
 
+dr <- 100
+data_resolution <- paste0(dr, "km2")
+
 #land
 land <- st_as_sf(ne_download(scale = 50, type = 'land', category = 'physical'))
 countries <- st_as_sf(ne_download(scale = 50, type = 'countries', category = 'cultural'))
@@ -85,7 +88,9 @@ dev.off()
 # 
 
 
+#################################################################################################
 # F2
+#################################################################################################
 
 out_sum <- sum(out_r)
 values(out_sum)[values(out_sum) == 0] <-  NA
@@ -117,8 +122,9 @@ dev.off()
 # 
 
 
+#################################################################################################
 # F3
-
+#################################################################################################
 here("manuscript/figures", paste0("Figure 3", ".png")) %>%
   png(width = 3600 * 4, height = 2000 * 4, res = 500)
 
@@ -171,5 +177,179 @@ plot(gadm_country2, legend.only=TRUE, col = pal(10),
 dev.off()
 
 
+#################################################################################################
+# governance
+#################################################################################################
+wb_mean <- raster(here("data/intermediate/", data_resolution, "wb_mean.tif"))
+wb_mean <- (wb_mean + min(wb_mean[], na.rm=T)) * -1
 
+here("manuscript/figures", paste0("Figure S1. Governance", ".png")) %>%
+  png(width = 3600 * 4, height = 2000 * 4, res = 500)
+
+par(mfrow=c(1, 1),
+    mar = c(0, 0, 0, 0),
+    cex = 2,
+    xpd=TRUE)
+
+plot(land$geometry, col = "grey", border = NA)
 # 
+pal <- brewer.pal(9, 'YlOrRd')
+pal <- colorRampPalette(pal)
+
+# gadm_country2 <- round(gadm_country2, 2)
+# breaks <- classIntervals(gadm_country2[!is.na(gadm_country2)], n = 10, style = "kmeans")
+
+# levelplot(gadm_country2, at = breaks$brks, col.regions = colorRampPalette(brewer.pal(9, 'YlOrRd')),
+#           margin=FALSE)
+
+plot(wb_mean, add = TRUE, col = pal(20), legend = FALSE, 
+     maxpixels = ncell(wb_mean))
+
+
+plot(countries$geometry, col = NA, lwd = 0.5, add = TRUE)
+
+plot(wb_mean, legend.only=TRUE, col = pal(20),
+     # breaks = round(breaks$brks,2),
+     # legend.width = 1, legend.shrink = 0.75,
+     smallplot=c(0.17, 0.18, 0.15, 0.55),
+     axis.args=list(#at=seq(r.range[1], r.range[2], 25),
+       #labels=seq(r.range[1], r.range[2], 25),
+       cex.axis = 2),
+     legend.args=list(text='Governance risk', side = 2, font=2, line=2.5, cex= 2))
+
+dev.off()
+
+
+
+#################################################################################################
+#lands
+#################################################################################################
+
+lands <- raster(here("data/intermediate/", data_resolution, "kehoe_land_system.tif"))
+lands <- (lands - 100) * -1
+
+here("manuscript/figures", paste0("Figure S2. Lands", ".png")) %>%
+  png(width = 3600 * 4, height = 2000 * 4, res = 500)
+
+par(mfrow=c(1, 1),
+    mar = c(0, 0, 0, 0),
+    cex = 2,
+    xpd=TRUE)
+
+plot(land$geometry, col = "grey", border = NA)
+# 
+pal <- brewer.pal(9, 'YlOrRd')
+pal <- colorRampPalette(pal)
+
+# gadm_country2 <- round(gadm_country2, 2)
+# breaks <- classIntervals(gadm_country2[!is.na(gadm_country2)], n = 10, style = "kmeans")
+
+# levelplot(gadm_country2, at = breaks$brks, col.regions = colorRampPalette(brewer.pal(9, 'YlOrRd')),
+#           margin=FALSE)
+
+plot(lands, add = TRUE, col = pal(20), legend = FALSE, 
+     maxpixels = ncell(lands))
+
+
+plot(countries$geometry, col = NA, lwd = 0.5, add = TRUE)
+
+plot(lands, legend.only=TRUE, col = pal(20),
+     # breaks = round(breaks$brks,2),
+     # legend.width = 1, legend.shrink = 0.75,
+     smallplot=c(0.17, 0.18, 0.15, 0.55),
+     axis.args=list(#at=seq(r.range[1], r.range[2], 25),
+       #labels=seq(r.range[1], r.range[2], 25),
+       cex.axis = 2),
+     legend.args=list(text='Land systems risk', side = 2, font=2, line=2.5, cex= 2))
+
+dev.off()
+
+
+#################################################################################################
+# clim_grid_ann <- raster(here("data/intermediate/", data_resolution, "probability-annual-iucn.tif"))
+#################################################################################################
+clim <- raster(here("data/intermediate/", data_resolution, "climate_frank_ehe.tif"))
+clim <- ((clim - min(clim[], na.rm=T)) * 100) + 0.01
+
+
+here("manuscript/figures", paste0("Figure S3. Climate", ".png")) %>%
+  png(width = 3600 * 4, height = 2000 * 4, res = 500)
+
+par(mfrow=c(1, 1),
+    mar = c(0, 0, 0, 0),
+    cex = 2,
+    xpd=TRUE)
+
+plot(land$geometry, col = "grey", border = NA)
+# 
+pal <- brewer.pal(9, 'YlOrRd')
+pal <- colorRampPalette(pal)
+
+clim <- round(clim, 2)
+breaks <- classIntervals(clim[!is.na(clim)], n = 10, style = "quantile")
+
+# levelplot(gadm_country2, at = breaks$brks, col.regions = colorRampPalette(brewer.pal(9, 'YlOrRd')),
+#           margin=FALSE)
+
+plot(clim, add = TRUE, col = pal(10), breaks = breaks$brks,
+     maxpixels = ncell(clim), legend = FALSE)
+
+plot(countries$geometry, col = NA, lwd = 0.5, add = TRUE)
+
+plot(clim, legend.only=TRUE, col = pal(10),
+     breaks = round(breaks$brks,2),
+     # legend.width = 1, legend.shrink = 0.75,
+     smallplot=c(0.17, 0.18, 0.15, 0.55),
+     axis.args=list(#at=seq(r.range[1], r.range[2], 25),
+       #labels=seq(r.range[1], r.range[2], 25),
+       cex.axis = 2),
+     legend.args=list(text='Climate risk', side = 2, font=2, line=2.5, cex= 2))
+
+dev.off()
+
+
+
+#################################################################################################
+#Figure S4
+#################################################################################################
+clim <- raster(here("data/intermediate/", data_resolution, "climate_frank_ehe.tif"))
+clim <- ((clim - min(clim[], na.rm=T)) * 100) + 0.01
+
+
+here("manuscript/figures", paste0("Figure S4", ".png")) %>%
+  png(width = 3600 * 4, height = 2000 * 4, res = 500)
+
+par(mfrow=c(1, 1),
+    mar = c(0, 0, 0, 0),
+    cex = 2,
+    xpd=TRUE)
+
+plot(land$geometry, col = "grey", border = NA)
+# 
+pal <- brewer.pal(9, 'YlOrRd')
+pal <- colorRampPalette(pal)
+
+clim <- round(clim, 2)
+breaks <- classIntervals(clim[!is.na(clim)], n = 10, style = "quantile")
+
+# levelplot(gadm_country2, at = breaks$brks, col.regions = colorRampPalette(brewer.pal(9, 'YlOrRd')),
+#           margin=FALSE)
+
+plot(clim, add = TRUE, col = pal(10), breaks = breaks$brks,
+     maxpixels = ncell(clim), legend = FALSE)
+
+plot(countries$geometry, col = NA, lwd = 0.5, add = TRUE)
+
+plot(clim, legend.only=TRUE, col = pal(10),
+     breaks = round(breaks$brks,2),
+     # legend.width = 1, legend.shrink = 0.75,
+     smallplot=c(0.17, 0.18, 0.15, 0.55),
+     axis.args=list(#at=seq(r.range[1], r.range[2], 25),
+       #labels=seq(r.range[1], r.range[2], 25),
+       cex.axis = 2),
+     legend.args=list(text='Climate risk', side = 2, font=2, line=2.5, cex= 2))
+
+dev.off()
+
+
+
