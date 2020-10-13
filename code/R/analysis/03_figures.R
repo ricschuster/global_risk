@@ -195,7 +195,7 @@ par(mfrow=c(1, 1),
 
 plot(land$geometry, col = "grey", border = NA)
 # 
-pal <- brewer.pal(9, 'YlOrRd')
+pal <- brewer.pal(9, 'YlGnBu')
 pal <- colorRampPalette(pal)
 
 # gadm_country2 <- round(gadm_country2, 2)
@@ -240,7 +240,7 @@ par(mfrow=c(1, 1),
 
 plot(land$geometry, col = "grey", border = NA)
 # 
-pal <- brewer.pal(9, 'YlOrRd')
+pal <- brewer.pal(9, 'YlGnBu')
 pal <- colorRampPalette(pal)
 
 # gadm_country2 <- round(gadm_country2, 2)
@@ -284,7 +284,7 @@ par(mfrow=c(1, 1),
 
 plot(land$geometry, col = "grey", border = NA)
 # 
-pal <- brewer.pal(9, 'YlOrRd')
+pal <- brewer.pal(9, 'YlGnBu')
 pal <- colorRampPalette(pal)
 
 clim <- round(clim, 2)
@@ -363,7 +363,7 @@ par(mfrow=c(1, 1),
     cex = 2,
     xpd=TRUE)
 
-plot(land$geometry, col = "grey", border = NA)
+plot(land$geometry, col = "grey95", border = NA)
 # 
 pal <- brewer.pal(9, 'YlOrRd')
 pal <- colorRampPalette(pal)
