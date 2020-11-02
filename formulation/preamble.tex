@@ -1,0 +1,44 @@
+% load packages
+\usepackage{amsmath,amsfonts,float,makecell,titletoc,titlesec,tocloft,lineno,booktabs,subfiles,textcomp,tabularx,etoolbox,longtable, adjustbox}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[utf8]{inputenc}
+\usepackage[doublespacing]{setspace}
+\usepackage[autostyle]{csquotes}
+
+% format captions
+\usepackage[labelfont={small,bf}, labelsep=space, font={small}]{caption}
+
+% line numbers
+\linenumbers
+
+% allow breaks in equations
+\allowdisplaybreaks
+
+% format section headers
+\titleformat*{\section}{\large\bfseries}
+\titleformat*{\subsection}{\large\bfseries}
+
+% make figures static
+\let\origfigure\figure
+\let\endorigfigure\endfigure
+\renewenvironment{figure}[1][2] {
+\expandafter\origfigure\expandafter[H]
+} {
+\endorigfigure
+}
+
+% center tables
+\let\Begin\begin
+
+\let\End\end
+
+% make tables in fontnote size font
+\AtBeginEnvironment{longtable}{\scriptsize\singlespacing}
+\AtBeginEnvironment{multicols}{\scriptsize\singlespacing}
+\AtBeginEnvironment{tabular}{\scriptsize\singlespacing}
+\AtBeginEnvironment{longtabu}{\scriptsize\singlespacing}
+
+% define struts for tables
+\newcommand\T{\rule{0pt}{2.6ex}} % top strut
+\newcommand\B{\rule[-1.2ex]{0pt}{0pt}} % bottom strut
