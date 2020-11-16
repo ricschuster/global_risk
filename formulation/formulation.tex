@@ -1,0 +1,179 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+  11pt,
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Multi-objective integer programming formulation},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+% load packages
+\usepackage{amsmath,amsfonts,float,makecell,titletoc,titlesec,tocloft,lineno,booktabs,subfiles,textcomp,tabularx,etoolbox,longtable, adjustbox}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[utf8]{inputenc}
+\usepackage[doublespacing]{setspace}
+\usepackage[autostyle]{csquotes}
+
+% format captions
+\usepackage[labelfont={small,bf}, labelsep=space, font={small}]{caption}
+
+% line numbers
+\linenumbers
+
+% allow breaks in equations
+\allowdisplaybreaks
+
+% format section headers
+\titleformat*{\section}{\large\bfseries}
+\titleformat*{\subsection}{\large\bfseries}
+
+% make figures static
+\let\origfigure\figure
+\let\endorigfigure\endfigure
+\renewenvironment{figure}[1][2] {
+\expandafter\origfigure\expandafter[H]
+} {
+\endorigfigure
+}
+
+% center tables
+\let\Begin\begin
+
+\let\End\end
+
+% make tables in fontnote size font
+\AtBeginEnvironment{longtable}{\scriptsize\singlespacing}
+\AtBeginEnvironment{multicols}{\scriptsize\singlespacing}
+\AtBeginEnvironment{tabular}{\scriptsize\singlespacing}
+\AtBeginEnvironment{longtabu}{\scriptsize\singlespacing}
+
+% define struts for tables
+\newcommand\T{\rule{0pt}{2.6ex}} % top strut
+\newcommand\B{\rule[-1.2ex]{0pt}{0pt}} % bottom strut
+\ifluatex
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\title{Multi-objective integer programming formulation}
+\author{}
+\date{\vspace{-2.5em}02 November 2020}
+
+\begin{document}
+\maketitle
+
+We will begin by recalling fundamental concepts in systematic
+conservation planning. Conservation features describe the biodiversity
+units (e.g.~species, communities, habitat types) that are used to inform
+protected area establishment. Planning units describe the candidate
+areas for protected area establishment (e.g.~cadastral units). Each
+planning unit contains an amount of each feature (e.g.~presence/absence,
+number of individuals). A prioritisation describes a candidate set of
+planning units selected for protected establishment. Each feature has a
+representation target indicating the minimum amount of each feature that
+ideally should be held in the prioritisation (e.g.~50 presences, 200
+individuals). To minimize risk, we have a set of datasets describing the
+relative risk associated with selecting each planning unit for protected
+area establishment. Thus we wish to identify a prioritisation that meets
+the representation targets for all of the conservation features, with
+minimal risk.
+
+We will now express these concepts using mathematical notation. Let
+\(I\) denote the set of conservation features (indexed by \(i\)), and
+\(J\) denote the set of planning units (indexed by \(j\)). To describe
+existing conservation efforts, let \(p_j\) indicate (i.e., using zeros
+and ones) if each planning unit \(j \in J\) ia already part of the
+global protected area system. To describe the spatial distribution of
+the features, let \(A_{ij}\) denote (i.e., using zeros and ones) if each
+feature is present or absent from each planning unit. To ensure the
+features are adequately represented by the solution, let \(T_i\) denote
+the conservation target for each feature \(i \in I\). Next, let \(D\)
+denote the set of risk datasets (indexed by \(d\)). To describe the
+relative risk associated with each planning unit, let \(R_{dj}\) denote
+the risk for planning units \(j \in J\) according to risk datasets
+\(d \in D\).
+
+\clearpage
+
+The problem contains the binary decision variables \(x_j\) for planning
+units \(j \in J\).
+
+\begin{align*}
+x_j &=
+\begin{cases}
+1, \text{ if $j$ selected for prioritisation}, \tag{eqn 1a} \\
+0, \text{ else }
+\end{cases} \\
+\end{align*}
+
+The reserve selection problem is formulated following:
+
+\begin{align*}
+\text{lexmin } & f_1(x), f_2(x), \ldots f_D(x) & \tag{eqn 2a} \\
+\text{subject to } & f_d(x) = \sum_{j \in J} R_{dj} X_j & \forall d \in D \tag{eqn 2b} \\
+& \sum_{j \in J} A_{ij} \geq T_i & \forall i \in I \tag{eqn 2c} \\
+& x_j \geq p_j & \forall j \in J \tag{eqn2d} \\
+& x_j \in \{ 0, 1 \} & \forall j \in J \tag{eqn 2e} \\
+\end{align*}
+
+The objective function (eqn 2a) is to lexicographically (hierarchically)
+minimize multiple functions. Constraints (eqn 2b) define each of these
+functions as the total risk encompassed by selected planning units given
+each risk dataset. Constraints (eqn 2c) ensure that the representation
+targets (\(T_i\)) are met for all features. Constraints (eqn 2d) ensure
+that the existing protected areas are selected in the solution. Finally,
+constraints (eqns 2e) ensure that the decision variables \(x_j\) contain
+zeros or ones.
+
+\end{document}
