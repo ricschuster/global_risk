@@ -34,8 +34,38 @@ names(out_r) <- nms
 land <- st_transform(land, crs = proj4string(out_r))
 countries <- st_transform(countries, crs = proj4string(out_r))
 
+#################################################################################################
+# SLC map
+#################################################################################################
+here("manuscript/figures", paste0("Figure SLC", ".png")) %>%
+  png(width = 3600 * 4, height = 2000 * 4, res = 500)
 
+old.par <- par(mfrow=c(1,1))
+par(mar = c(0.1, 0.1, 0.1, 0.1), oma = c(0,3.5,1.5,0), bg = "white")
+
+# print map
+plot(land$geometry, col = "grey95", border = NA)
+# title(names(out_r)[ii], cex.main = 1.5)
+
+plot(out_r[[10]], add = TRUE, col = c(rgb(0,0,0,alpha=0), "#8c510a"), legend = FALSE, 
+     maxpixels = ncell(out_r))
+
+plot(wdpa, add = TRUE, col = "#01665e", legend = FALSE)
+
+# boundaries
+plot(countries$geometry, col = NA, lwd = 0.2, add = TRUE)
+
+legend("left", inset=.02, #title="Number of Cylinders",
+       c("Protected areas", "Priority areas"), fill =  c("#01665e", "#8c510a"), cex = 2)
+
+dev.off()
+# 
+
+
+
+#################################################################################################
 # F1
+#################################################################################################
 here("manuscript/figures", paste0("Figure 1", ".png")) %>%
   png(width = 4000, height = 4000, res = 600)
 
@@ -85,6 +115,36 @@ for (ii in 1:nlayers(out_r)) {
 # mtext("10", side=2, at = 0.5, cex=1, col="black", outer=TRUE, las = 1) 
 # mtext("100", side=2, at = 0.3, cex=1, col="black", outer=TRUE, las = 1) 
 # mtext("1,000", side=2, at = 0.1, cex=1, col="black", outer=TRUE, las = 1) 
+
+dev.off()
+# 
+
+#################################################################################################
+# No regrets figure
+#################################################################################################
+out_sum <- sum(out_r)
+values(out_sum)[values(out_sum) == 0] <-  NA
+
+here("manuscript/figures", paste0("Figure no regrets", ".png")) %>%
+  png(width = 3600 * 4, height = 2000 * 4, res = 500)
+
+old.par <- par(mfrow=c(1,1))
+par(mar = c(0.1, 0.1, 0.1, 0.1), oma = c(0,3.5,1.5,0), bg = "white")
+
+# print map
+plot(land$geometry, col = "grey95", border = NA)
+# title(names(out_r)[ii], cex.main = 1.5)
+
+plot(out_sum > 14, add = TRUE, col = c(rgb(0,0,0,alpha=0), "#c51b8a"), legend = FALSE, 
+     maxpixels = ncell(out_r))
+
+plot(wdpa, add = TRUE, col = "#01665e", legend = FALSE)
+
+# boundaries
+plot(countries$geometry, col = NA, lwd = 0.2, add = TRUE)
+
+legend("left", inset=.02, #title="Number of Cylinders",
+       c("Protected areas", "No regrets areas"), fill =  c("#01665e", "#c51b8a"), cex = 2)
 
 dev.off()
 # 
