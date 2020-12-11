@@ -9,6 +9,9 @@ library(classInt)
 library(tidyverse)
 library(fasterize)
 
+# very useful function to create and extent object from clicking on a map
+# e <- drawExtent()
+
 dr <- 100
 data_resolution <- paste0(dr, "km2")
 
@@ -56,7 +59,7 @@ plot(wdpa, add = TRUE, col = "#01665e", legend = FALSE)
 plot(countries$geometry, col = NA, lwd = 0.2, add = TRUE)
 
 legend("left", inset=.02, #title="Number of Cylinders",
-       c("Protected areas", "Priority areas"), fill =  c("#01665e", "#8c510a"), cex = 2)
+       c("Current protected areas", "Priority areas"), fill =  c("#01665e", "#8c510a"), cex = 2)
 
 dev.off()
 # 
@@ -144,7 +147,7 @@ plot(wdpa, add = TRUE, col = "#01665e", legend = FALSE)
 plot(countries$geometry, col = NA, lwd = 0.2, add = TRUE)
 
 legend("left", inset=.02, #title="Number of Cylinders",
-       c("Protected areas", "No regrets areas"), fill =  c("#01665e", "#c51b8a"), cex = 2)
+       c("Current protected areas", "No regrets areas"), fill =  c("#01665e", "#c51b8a"), cex = 2)
 
 dev.off()
 # 
