@@ -457,14 +457,19 @@ wb_mean <- raster(here("data/intermediate/", data_resolution, "wb_mean.tif"))
 wb_mean <- (wb_mean + min(wb_mean[], na.rm=T)) * -1
 
 # 
-pal <- brewer.pal(9, 'Greys')
+pal <- brewer.pal(9, 'YlGnBu')
 pal <- colorRampPalette(pal)
+
+gov_col = c('#a6611a', '#018571', '#5e3c99')
+gov <- base + out_r$S * 2
+gov[gov < 1] <- NA
+gov <- as.factor(gov)
 
 
 here("manuscript/figures", paste0("Figure X. Zoom", ".png")) %>%
-  png(width = 3600 * 4, height = 2000 * 4, res = 500)
+  png(width = 3600 * 1, height = 4000 * 1, res = 500)
 
-par(mfrow=c(1, 1),
+par(mfrow=c(2, 1),
     mar = c(0, 0, 0, 0),
     cex = 2,
     xpd=TRUE)
@@ -472,22 +477,36 @@ par(mfrow=c(1, 1),
 # e <- drawExtent()
 land$geometry %>% st_crop(e) %>% plot(col = "grey95", border = NA)
 
-# plot(base + out_r$S * 10, add = TRUE, legend = FALSE)
 
+gov %>% plot(add = TRUE, legend = FALSE, col = gov_col)
+
+countries$geometry%>% plot(col = NA, lwd = 0.5, add = TRUE)
+legend(x='topleft', title = "Scenarios", 
+       legend = c("base", "governance", "both"), fill = gov_col,
+       bty = "n")
+box()
+
+land$geometry %>% st_crop(e) %>% plot(col = "grey95", border = NA)
 plot(wb_mean, add = TRUE, col = pal(20), legend = FALSE, 
      maxpixels = ncell(wb_mean))
-
-plot(base + out_r$S * 10, add = TRUE, legend = FALSE)
-
-countries$geometry%>% plot(col = NA, lwd = 0.2, add = TRUE)
-
+countries$geometry%>% plot(col = NA, lwd = 0.5, add = TRUE)
 plot(wb_mean, legend.only=TRUE, col = pal(20),
      # breaks = round(breaks$brks,2),
      # legend.width = 1, legend.shrink = 0.75,
-     smallplot=c(0.17, 0.18, 0.15, 0.55),
+     smallplot=c(0.08, 0.10, 0.5, 0.9),
      axis.args=list(#at=seq(r.range[1], r.range[2], 25),
        #labels=seq(r.range[1], r.range[2], 25),
-       cex.axis = 2),
-     legend.args=list(text='Governance risk', side = 2, font=2, line=2.5, cex= 2))
+       cex.axis = 1),
+     legend.args=list(text='Governance risk', side = 3, font = 1, line= 1, cex= 1))
+box()
 
 dev.off()
+
+
+
+
+
+
+
+
+
