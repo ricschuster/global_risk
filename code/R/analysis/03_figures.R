@@ -447,4 +447,47 @@ plot(plt_rst, legend.only=TRUE, col = my_col,
 
 dev.off()
 
+#################################################################################################
+# Zoomed figures
+#################################################################################################
+# e <- drawExtent()
+base <- raster(fls[1])
 
+wb_mean <- raster(here("data/intermediate/", data_resolution, "wb_mean.tif"))
+wb_mean <- (wb_mean + min(wb_mean[], na.rm=T)) * -1
+
+# 
+pal <- brewer.pal(9, 'Greys')
+pal <- colorRampPalette(pal)
+
+
+here("manuscript/figures", paste0("Figure X. Zoom", ".png")) %>%
+  png(width = 3600 * 4, height = 2000 * 4, res = 500)
+
+par(mfrow=c(1, 1),
+    mar = c(0, 0, 0, 0),
+    cex = 2,
+    xpd=TRUE)
+
+# e <- drawExtent()
+land$geometry %>% st_crop(e) %>% plot(col = "grey95", border = NA)
+
+# plot(base + out_r$S * 10, add = TRUE, legend = FALSE)
+
+plot(wb_mean, add = TRUE, col = pal(20), legend = FALSE, 
+     maxpixels = ncell(wb_mean))
+
+plot(base + out_r$S * 10, add = TRUE, legend = FALSE)
+
+countries$geometry%>% plot(col = NA, lwd = 0.2, add = TRUE)
+
+plot(wb_mean, legend.only=TRUE, col = pal(20),
+     # breaks = round(breaks$brks,2),
+     # legend.width = 1, legend.shrink = 0.75,
+     smallplot=c(0.17, 0.18, 0.15, 0.55),
+     axis.args=list(#at=seq(r.range[1], r.range[2], 25),
+       #labels=seq(r.range[1], r.range[2], 25),
+       cex.axis = 2),
+     legend.args=list(text='Governance risk', side = 2, font=2, line=2.5, cex= 2))
+
+dev.off()
