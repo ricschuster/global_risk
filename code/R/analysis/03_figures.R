@@ -456,26 +456,49 @@ base <- raster(fls[1])
 wb_mean <- raster(here("data/intermediate/", data_resolution, "wb_mean.tif"))
 wb_mean <- (wb_mean + min(wb_mean[], na.rm=T)) * -1
 
-# 
-pal <- brewer.pal(9, 'YlGnBu')
-pal <- colorRampPalette(pal)
-
 gov_col = c('#a6611a', '#018571', '#5e3c99')
 gov <- base + out_r$S * 2
 gov[gov < 1] <- NA
 gov <- as.factor(gov)
 
+lands <- raster(here("data/intermediate/", data_resolution, "kehoe_land_system.tif"))
+lands <- (lands - 100) * -1
+
+land_col = c('#a6611a', '#018571', '#5e3c99')
+lndu <- base + out_r$L * 2
+lndu[lndu < 1] <- NA
+lndu <- as.factor(lndu)
+
+clim <- raster(here("data/intermediate/", data_resolution, "climate_frank_ehe.tif"))
+clim <- ((clim - min(clim[], na.rm=T)) * 100) + 0.01
+
+clim <- round(clim, 2)
+breaks <- classIntervals(clim[!is.na(clim)], n = 10, style = "quantile")
+
+
+clr_col = c('#a6611a', '#018571', '#5e3c99')
+clr <- base + out_r$C * 2
+clr[clr < 1] <- NA
+clr <- as.factor(clr)
+
+
+pal <- brewer.pal(9, 'YlGnBu')
+pal <- colorRampPalette(pal)
+
+
 
 here("manuscript/figures", paste0("Figure X. Zoom", ".png")) %>%
-  png(width = 3600 * 1, height = 4000 * 1, res = 500)
+  png(width = 3600 * 3, height = 4000 * 1, res = 500)
 
-par(mfrow=c(2, 1),
+par(mfrow=c(2, 3),
     mar = c(0, 0, 0, 0),
     cex = 2,
     xpd=TRUE)
 
+#Governance results
 # e <- drawExtent()
-land$geometry %>% st_crop(e) %>% plot(col = "grey95", border = NA)
+ge <- extent(c(132508.5, 3551884, 6211332, 8118213))
+land$geometry %>% st_crop(ge) %>% plot(col = "grey95", border = NA)
 
 
 gov %>% plot(add = TRUE, legend = FALSE, col = gov_col)
@@ -486,7 +509,35 @@ legend(x='topleft', title = "Scenarios",
        bty = "n")
 box()
 
-land$geometry %>% st_crop(e) %>% plot(col = "grey95", border = NA)
+#Landuse results
+le <- extent(c(-2042825, 304250.5, 279510.6, 1931156))
+land$geometry %>% st_crop(le) %>% plot(col = "grey95", border = NA)
+
+
+lndu %>% plot(add = TRUE, legend = FALSE, col = gov_col)
+
+countries$geometry%>% plot(col = NA, lwd = 0.5, add = TRUE)
+legend(x='topleft', title = "Scenarios", 
+       legend = c("base", "land systems", "both"), fill = land_col,
+       bty = "n")
+box()
+
+#Climate results
+ce <- extent(c(-1204941, 2808204, 2112762, 5035378))
+land$geometry %>% st_crop(ce) %>% plot(col = "grey95", border = NA)
+
+
+clr %>% plot(add = TRUE, legend = FALSE, col = gov_col)
+
+countries$geometry%>% plot(col = NA, lwd = 0.5, add = TRUE)
+legend(x='topleft', title = "Scenarios", 
+       legend = c("base", "climate", "both"), fill = clr_col,
+       bty = "n")
+box()
+
+
+#Governance layer
+land$geometry %>% st_crop(ge) %>% plot(col = "grey95", border = NA)
 plot(wb_mean, add = TRUE, col = pal(20), legend = FALSE, 
      maxpixels = ncell(wb_mean))
 countries$geometry%>% plot(col = NA, lwd = 0.5, add = TRUE)
@@ -500,13 +551,36 @@ plot(wb_mean, legend.only=TRUE, col = pal(20),
      legend.args=list(text='Governance risk', side = 3, font = 1, line= 1, cex= 1))
 box()
 
+
+#Landuse layer
+land$geometry %>% st_crop(le) %>% plot(col = "grey95", border = NA)
+plot(lands, add = TRUE, col = pal(20), legend = FALSE, 
+     maxpixels = ncell(lands))
+countries$geometry%>% plot(col = NA, lwd = 0.5, add = TRUE)
+plot(lands, legend.only=TRUE, col = pal(20),
+     # breaks = round(breaks$brks,2),
+     # legend.width = 1, legend.shrink = 0.75,
+     smallplot=c(0.08, 0.10, 0.5, 0.9),
+     axis.args=list(#at=seq(r.range[1], r.range[2], 25),
+       #labels=seq(r.range[1], r.range[2], 25),
+       cex.axis = 1),
+     legend.args=list(text='Land systems risk', side = 3, font = 1, line= 1, cex= 1))
+box()
+
+
+#Climate layer
+land$geometry %>% st_crop(ce) %>% plot(col = "grey95", border = NA)
+plot(clim, add = TRUE, col = pal(10), breaks = breaks$brks,
+     maxpixels = ncell(clim), legend = FALSE)
+countries$geometry%>% plot(col = NA, lwd = 0.5, add = TRUE)
+plot(clim, legend.only=TRUE, col = pal(10),
+     breaks = round(breaks$brks,2),
+     # legend.width = 1, legend.shrink = 0.75,
+     smallplot=c(0.08, 0.10, 0.5, 0.9),
+     axis.args=list(#at=seq(r.range[1], r.range[2], 25),
+       #labels=seq(r.range[1], r.range[2], 25),
+       cex.axis = 1),
+     legend.args=list(text='Climate risk', side = 3, font = 1, line= 1, cex= 1))
+box()
+
 dev.off()
-
-
-
-
-
-
-
-
-
