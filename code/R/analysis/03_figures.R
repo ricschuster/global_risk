@@ -508,36 +508,36 @@ land$geometry %>% st_crop(ge) %>% plot(col = "grey95", border = NA)
 
 gov %>% plot(add = TRUE, legend = FALSE, col = gov_col)
 
-countries$geometry%>% plot(col = NA, lwd = 0.5, add = TRUE)
+countries$geometry%>% plot(col = NA, lwd = 1, border = "black", add = TRUE)
 legend(x='topleft', title = "Scenarios", 
        legend = c("base", "governance", "both"), fill = gov_col,
-       bty = "n")
+       bty = "n", cex = 2)
 box()
 
 #Landuse results
-le <- extent(c(-2042825, 304250.5, 279510.6, 1931156))
+le <- extent(c(-1441500, -495817.2, 545954.3, 1448894))
 land$geometry %>% st_crop(le) %>% plot(col = "grey95", border = NA)
 
 
 lndu %>% plot(add = TRUE, legend = FALSE, col = gov_col)
 
-countries$geometry%>% plot(col = NA, lwd = 0.5, add = TRUE)
+countries$geometry%>% plot(col = NA, lwd = 1, border = "black", add = TRUE)
 legend(x='topleft', title = "Scenarios", 
        legend = c("base", "land-use", "both"), fill = land_col,
-       bty = "n")
+       bty = "n", cex = 2)
 box()
 
 #Climate results
-ce <- extent(c(-1204941, 2808204, 2112762, 5035378))
+ce <- extent(c(-1049678, 2468960, 2375318, 4853313))
 land$geometry %>% st_crop(ce) %>% plot(col = "grey95", border = NA)
 
 
 clr %>% plot(add = TRUE, legend = FALSE, col = gov_col)
 
-countries$geometry%>% plot(col = NA, lwd = 0.5, add = TRUE)
+countries$geometry%>% plot(col = NA, lwd = 1, border = "black", add = TRUE)
 legend(x='topleft', title = "Scenarios", 
        legend = c("base", "climate", "both"), fill = clr_col,
-       bty = "n")
+       bty = "n", cex = 2)
 box()
 
 
@@ -545,15 +545,15 @@ box()
 land$geometry %>% st_crop(ge) %>% plot(col = "grey95", border = NA)
 plot(wb_mean, add = TRUE, col = pal(20), legend = FALSE, 
      maxpixels = ncell(wb_mean))
-countries$geometry%>% plot(col = NA, lwd = 0.5, add = TRUE)
+countries$geometry%>% plot(col = NA, lwd = 1, border = "black", add = TRUE)
 plot(wb_mean, legend.only=TRUE, col = pal(20),
      # breaks = round(breaks$brks,2),
      # legend.width = 1, legend.shrink = 0.75,
      smallplot=c(0.08, 0.10, 0.5, 0.9),
      axis.args=list(#at=seq(r.range[1], r.range[2], 25),
        #labels=seq(r.range[1], r.range[2], 25),
-       cex.axis = 1),
-     legend.args=list(text='Governance risk', side = 3, font = 1, line= 1, cex= 1))
+       cex.axis = 2),
+     legend.args=list(text='Governance risk', side = 2, font = 1, line = 1, cex = 2))
 box()
 
 
@@ -561,15 +561,15 @@ box()
 land$geometry %>% st_crop(le) %>% plot(col = "grey95", border = NA)
 plot(lands, add = TRUE, col = pal(20), legend = FALSE, 
      maxpixels = ncell(lands))
-countries$geometry%>% plot(col = NA, lwd = 0.5, add = TRUE)
+countries$geometry%>% plot(col = NA, lwd = 1, border = "black", add = TRUE)
 plot(lands, legend.only=TRUE, col = pal(20),
      # breaks = round(breaks$brks,2),
      # legend.width = 1, legend.shrink = 0.75,
      smallplot=c(0.08, 0.10, 0.5, 0.9),
      axis.args=list(#at=seq(r.range[1], r.range[2], 25),
        #labels=seq(r.range[1], r.range[2], 25),
-       cex.axis = 1),
-     legend.args=list(text='Land-use risk', side = 3, font = 1, line= 1, cex= 1))
+       cex.axis = 2),
+     legend.args=list(text='Land-use risk', side = 2, font = 1, line = 1, cex = 2))
 box()
 
 
@@ -577,20 +577,20 @@ box()
 land$geometry %>% st_crop(ce) %>% plot(col = "grey95", border = NA)
 plot(clim, add = TRUE, col = pal(10), breaks = breaks$brks,
      maxpixels = ncell(clim), legend = FALSE)
-countries$geometry%>% plot(col = NA, lwd = 0.5, add = TRUE)
+countries$geometry%>% plot(col = NA, lwd = 1, border = "white", add = TRUE)
 plot(clim, legend.only=TRUE, col = pal(10),
      breaks = round(breaks$brks,2),
      # legend.width = 1, legend.shrink = 0.75,
      smallplot=c(0.08, 0.10, 0.5, 0.9),
      axis.args=list(#at=seq(r.range[1], r.range[2], 25),
        #labels=seq(r.range[1], r.range[2], 25),
-       cex.axis = 1),
-     legend.args=list(text='Climate risk', side = 3, font = 1, line= 1, cex= 1))
+       cex.axis = 2),
+     legend.args=list(text='Climate risk', side = 2, font = 1, line = 1, cex = 2))
 box()
 
-grid.raster(icon_gov, x=.025, y=.85, width=.04) 
-grid.raster(icon_land, x=.36, y=.85, width=.04) 
-grid.raster(icon_clim, x=.69, y=.85, width=.04) 
+grid.raster(icon_gov, x=.025, y=.79, width=.04) 
+grid.raster(icon_land, x=.36, y=.79, width=.04) 
+grid.raster(icon_clim, x=.69, y=.79, width=.04) 
 
 
 dev.off()
