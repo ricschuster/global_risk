@@ -8,6 +8,8 @@ library(RColorBrewer)
 library(classInt)
 library(tidyverse)
 library(fasterize)
+library(png)
+library(grid)
 
 # very useful function to create and extent object from clicking on a map
 # e <- drawExtent()
@@ -485,6 +487,9 @@ clr <- as.factor(clr)
 pal <- brewer.pal(9, 'YlGnBu')
 pal <- colorRampPalette(pal)
 
+icon_gov <- readPNG(here("manuscript/figures/", "icon_gov.png"))
+icon_land <- readPNG(here("manuscript/figures/", "icon_land.png"))
+icon_clim <- readPNG(here("manuscript/figures/", "icon_clim.png"))
 
 
 here("manuscript/figures", paste0("Figure X. Zoom", ".png")) %>%
@@ -518,7 +523,7 @@ lndu %>% plot(add = TRUE, legend = FALSE, col = gov_col)
 
 countries$geometry%>% plot(col = NA, lwd = 0.5, add = TRUE)
 legend(x='topleft', title = "Scenarios", 
-       legend = c("base", "land systems", "both"), fill = land_col,
+       legend = c("base", "land-use", "both"), fill = land_col,
        bty = "n")
 box()
 
@@ -564,7 +569,7 @@ plot(lands, legend.only=TRUE, col = pal(20),
      axis.args=list(#at=seq(r.range[1], r.range[2], 25),
        #labels=seq(r.range[1], r.range[2], 25),
        cex.axis = 1),
-     legend.args=list(text='Land systems risk', side = 3, font = 1, line= 1, cex= 1))
+     legend.args=list(text='Land-use risk', side = 3, font = 1, line= 1, cex= 1))
 box()
 
 
@@ -582,5 +587,10 @@ plot(clim, legend.only=TRUE, col = pal(10),
        cex.axis = 1),
      legend.args=list(text='Climate risk', side = 3, font = 1, line= 1, cex= 1))
 box()
+
+grid.raster(icon_gov, x=.025, y=.85, width=.04) 
+grid.raster(icon_land, x=.36, y=.85, width=.04) 
+grid.raster(icon_clim, x=.69, y=.85, width=.04) 
+
 
 dev.off()
