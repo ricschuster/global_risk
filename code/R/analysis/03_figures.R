@@ -11,6 +11,7 @@ library(fasterize)
 library(png)
 library(grid)
 
+
 # very useful function to create and extent object from clicking on a map
 # e <- drawExtent()
 
