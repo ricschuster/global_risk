@@ -501,46 +501,11 @@ par(mfrow=c(2, 3),
     cex = 2,
     xpd=TRUE)
 
-#Governance results
+#Extents
 # e <- drawExtent()
 ge <- extent(c(132508.5, 3551884, 6211332, 8118213))
-land$geometry %>% st_crop(ge) %>% plot(col = "grey95", border = NA)
-
-
-gov %>% plot(add = TRUE, legend = FALSE, col = gov_col)
-
-countries$geometry%>% plot(col = NA, lwd = 1, border = "black", add = TRUE)
-legend(x='topleft', title = "Scenarios", 
-       legend = c("base", "governance", "both"), fill = gov_col,
-       bty = "n", cex = 2)
-box()
-
-#Landuse results
 le <- extent(c(-1441500, -495817.2, 545954.3, 1448894))
-land$geometry %>% st_crop(le) %>% plot(col = "grey95", border = NA)
-
-
-lndu %>% plot(add = TRUE, legend = FALSE, col = gov_col)
-
-countries$geometry%>% plot(col = NA, lwd = 1, border = "black", add = TRUE)
-legend(x='topleft', title = "Scenarios", 
-       legend = c("base", "land-use", "both"), fill = land_col,
-       bty = "n", cex = 2)
-box()
-
-#Climate results
 ce <- extent(c(-1049678, 2468960, 2375318, 4853313))
-land$geometry %>% st_crop(ce) %>% plot(col = "grey95", border = NA)
-
-
-clr %>% plot(add = TRUE, legend = FALSE, col = gov_col)
-
-countries$geometry%>% plot(col = NA, lwd = 1, border = "black", add = TRUE)
-legend(x='topleft', title = "Scenarios", 
-       legend = c("base", "climate", "both"), fill = clr_col,
-       bty = "n", cex = 2)
-box()
-
 
 #Governance layer
 land$geometry %>% st_crop(ge) %>% plot(col = "grey95", border = NA)
@@ -589,9 +554,46 @@ plot(clim, legend.only=TRUE, col = pal(10),
      legend.args=list(text='Climate risk', side = 2, font = 1, line = 1, cex = 2))
 box()
 
-grid.raster(icon_gov, x=.025, y=.79, width=.04) 
-grid.raster(icon_land, x=.36, y=.79, width=.04) 
-grid.raster(icon_clim, x=.69, y=.79, width=.04) 
+
+#Governance results
+land$geometry %>% st_crop(ge) %>% plot(col = "grey95", border = NA)
+
+
+gov %>% plot(add = TRUE, legend = FALSE, col = gov_col)
+
+countries$geometry%>% plot(col = NA, lwd = 1, border = "black", add = TRUE)
+legend(x='topleft', title = "Scenarios", 
+       legend = c("null", "governance", "both"), fill = gov_col,
+       bty = "n", cex = 2)
+box()
+
+#Landuse results
+land$geometry %>% st_crop(le) %>% plot(col = "grey95", border = NA)
+
+
+lndu %>% plot(add = TRUE, legend = FALSE, col = gov_col)
+
+countries$geometry%>% plot(col = NA, lwd = 1, border = "black", add = TRUE)
+legend(x='topleft', title = "Scenarios", 
+       legend = c("null", "land-use", "both"), fill = land_col,
+       bty = "n", cex = 2)
+box()
+
+#Climate results
+land$geometry %>% st_crop(ce) %>% plot(col = "grey95", border = NA)
+
+
+clr %>% plot(add = TRUE, legend = FALSE, col = gov_col)
+
+countries$geometry%>% plot(col = NA, lwd = 1, border = "black", add = TRUE)
+legend(x='topleft', title = "Scenarios", 
+       legend = c("null", "climate", "both"), fill = clr_col,
+       bty = "n", cex = 2)
+box()
+
+grid.raster(icon_gov, x=.025, y=.29, width=.04) 
+grid.raster(icon_land, x=.36, y=.29, width=.04) 
+grid.raster(icon_clim, x=.69, y=.29, width=.04) 
 
 
 dev.off()
