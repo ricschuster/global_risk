@@ -15,7 +15,7 @@ subparagraph: true
 
 We will begin by recalling fundamental concepts in systematic conservation planning. Conservation features describe the biodiversity units (e.g. species, communities, habitat types) that are used to inform protected area establishment. Planning units describe the candidate areas for protected area establishment (e.g. cadastral units). Each planning unit contains an amount of each feature (e.g. presence/absence, number of individuals). A prioritisation describes a candidate set of planning units selected for protected establishment. Each feature has a representation target indicating the minimum amount of each feature that ideally should be held in the prioritisation (e.g. 50 presences, 200 individuals). To minimize risk, we have a set of datasets describing the relative risk associated with selecting each planning unit for protected area establishment. Thus we wish to identify a prioritisation that meets the representation targets for all of the conservation features, with minimal risk.
 
-We will now express these concepts using mathematical notation. Let $I$ denote the set of conservation features (indexed by $i$), and $J$ denote the set of planning units (indexed by $j$). To describe existing conservation efforts, let $p_j$ indicate (i.e., using zeros and ones) if each planning unit $j \in J$ ia already part of the global protected area system. To describe the spatial distribution of the features, let $A_{ij}$ denote (i.e., using zeros and ones) if each feature is present or absent from each planning unit. To ensure the features are adequately represented by the solution, let $T_i$ denote the conservation target for each feature $i \in I$. Next, let $D$ denote the set of risk datasets (indexed by $d$). To describe the relative risk associated with each planning unit, let $R_{dj}$ denote the risk for planning units $j \in J$ according to risk datasets $d \in D$.
+We will now express these concepts using mathematical notation. Let $I$ denote the set of conservation features (indexed by $i$), and $J$ denote the set of planning units (indexed by $j$). To describe existing conservation efforts, let $p_j$ indicate (i.e., using zeros and ones) if each planning unit $j \in J$ ia already part of the global protected area system. To describe the spatial distribution of the features, let $A_{ij}$ denote (i.e., using zeros and ones) if each feature is present or absent from each planning unit. To ensure the features are adequately represented by the solution, let $t_i$ denote the conservation target for each feature $i \in I$. Next, let $D$ denote the set of risk datasets (indexed by $d$). To describe the relative risk associated with each planning unit, let $R_{dj}$ denote the risk for planning units $j \in J$ according to risk datasets $d \in D$.
 
 \clearpage
 
@@ -33,10 +33,10 @@ The reserve selection problem is formulated following:
 
 \begin{align*}
 \text{lexmin } & f_1(x), f_2(x), \ldots f_D(x) & \tag{eqn 2a} \\
-\text{subject to } & f_d(x) = \sum_{j \in J} R_{dj} X_j & \forall d \in D \tag{eqn 2b} \\
-& \sum_{j \in J} A_{ij} \geq T_i & \forall i \in I \tag{eqn 2c} \\
+\text{subject to } & f_d(x) = \sum_{j \in J} R_{dj} x_j & \forall d \in D \tag{eqn 2b} \\
+& \sum_{j \in J} A_{ij} \geq t_i & \forall i \in I \tag{eqn 2c} \\
 & x_j \geq p_j & \forall j \in J \tag{eqn2d} \\
 & x_j \in \{ 0, 1 \} & \forall j \in J \tag{eqn 2e} \\
 \end{align*}
 
-The objective function (eqn 2a) is to lexicographically (hierarchically) minimize multiple functions. Constraints (eqn 2b) define each of these functions as the total risk encompassed by selected planning units given each risk dataset. Constraints (eqn 2c) ensure that the representation targets ($T_i$) are met for all features. Constraints (eqn 2d) ensure that the existing protected areas are selected in the solution. Finally, constraints (eqns 2e) ensure that the decision variables $x_j$ contain zeros or ones.
+The objective function (eqn 2a) is to lexicographically (hierarchically) minimize multiple functions. Constraints (eqn 2b) define each of these functions as the total risk encompassed by selected planning units given each risk dataset. Constraints (eqn 2c) ensure that the representation targets ($t_i$) are met for all features. Constraints (eqn 2d) ensure that the existing protected areas are selected in the solution. Finally, constraints (eqns 2e) ensure that the decision variables $x_j$ contain zeros or ones.
