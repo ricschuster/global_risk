@@ -8,7 +8,7 @@ library(Rfast)
 library(ggpubr)
 library(fasterize)
 # setwd("E:/Richard/global_risk/")
-setwd("D:/Work/Papers/2019_global_risk/global_risk/")
+# setwd("D:/Work/Papers/2019_global_risk/global_risk/")
 library(here)
 #library(SparseData)
 # memory.limit(300000)
@@ -32,19 +32,19 @@ locked_in <- ifelse(!is.na(wdpa[][!is.na(pu[])]), TRUE, FALSE)
 
 if( !file.exists(paste0("data/intermediate/", data_resolution, "/rij.rds"))){
   
-  amph <- stack(list.files(here("data/raw/IUCN/Amph/"), full.names = TRUE))
+  amph <- stack(list.files(here("data/raw/IUCN_AOH/Amph/"), full.names = TRUE))
   rij_amph <- rij_matrix(pu, amph)
   saveRDS(rij_amph, here("data/intermediate/", data_resolution, "rij_amph.rds"))
   
-  bird <- stack(list.files(here("data/raw/IUCN/Bird/"), full.names = TRUE))
+  bird <- stack(list.files(here("data/raw/IUCN_AOH/Bird/"), full.names = TRUE))
   rij_bird <- rij_matrix(pu, bird)
   saveRDS(rij_bird, here("data/intermediate/", data_resolution, "rij_bird.rds"))
   
-  mamm <- stack(list.files(here("data/raw/IUCN/Mamm/"), full.names = TRUE))
+  mamm <- stack(list.files(here("data/raw/IUCN_AOH/Mamm/"), full.names = TRUE))
   rij_mamm <- rij_matrix(pu, mamm)
   saveRDS(rij_mamm, here("data/intermediate/", data_resolution, "rij_mamm.rds"))
   
-  rept <- stack(list.files(here("data/raw/IUCN/Rept/"), full.names = TRUE))
+  rept <- stack(list.files(here("data/raw/IUCN_AOH/Rept/"), full.names = TRUE))
   rij_rept <- rij_matrix(pu, rept)
   saveRDS(rij_rept, here("data/intermediate/", data_resolution, "rij_rept.rds"))
   
@@ -240,7 +240,7 @@ round(sum_tab * 100 / (land_area * 1000000) * 100, 2)[-15]
 dr <- 100
 data_resolution <- paste0(dr, "km2")
 
-trm <- raster(here("data/raw/IUCN/richness_10km_Birds_v7_spp_edited_tax_extant_1m_dense_EckertIV_1m_dissolved_Passeriformes_raster2.tif"))
+trm <- raster(here("data/raw/IUCN_AOH/Amphibians_AOH_10km/Abavorana luctuosa_aoh_10km.tif"))
 base_raster <- raster(trm) 
 res(base_raster) <- sqrt(dr) * 1000
 

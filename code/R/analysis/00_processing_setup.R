@@ -15,209 +15,211 @@ source(here("code/R/functions/geo.R"))
 dr <- 100
 data_resolution <- paste0(dr, "km2")
 
-trm <- raster(here("data/raw/IUCN/richness_10km_Birds_v7_spp_edited_tax_extant_1m_dense_EckertIV_1m_dissolved_Passeriformes_raster2.tif"))
+trm <- raster(here("data/raw/IUCN_AOH/Amphibians_AOH_10km/Abavorana luctuosa_aoh_10km.tif"))
 base_raster <- raster(trm) 
 res(base_raster) <- sqrt(dr) * 1000
 
-setwd("E:/Richard/IUCN/Spatial_data/")
-
-#####
-# Amphibians
-#####
-
-if(!file.exists(here("data/raw/IUCN/amph_diss.rds"))){
-  basewd <- setwd("AMPHIBIANS/")
-  
-  amph <- st_read("AMPHIBIANS.shp")
-  #filter out:
-  # presence other than 1 (extant)
-  # seasonal 3 (passage) and 4 (seasonal occurrence uncertain)
-  # origin 3 (introduced), 4 (vagrant), 5 (origin uncertain)
-  amph_red <- amph %>% filter(presence == 1, seasonal <= 3, origin <= 2)
-  
-  amph_proj <- amph_red %>% st_transform(crs = "+proj=eck4 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
-  amph_proj <- amph_proj %>% st_make_valid()
-  
-  ##NEED TO GROUP BY BINOMIAL AND SEASONAL TO CAPTURE RESIDENT, BREEDING, AND NON-BREEDING
-  amph_diss <- amph_proj %>% group_by(binomial, seasonal) %>% summarise()
-  
-  saveRDS(amph_diss, here("data/raw/IUCN/amph_diss.rds"))
-  
-} else {
-  amph_diss <- readRDS(here("data/raw/IUCN/amph_diss.rds"))
-}
-
-
-for(ii in 1:nrow(amph_diss)){
-  tmp_rast <- base_raster
-  tmp_rast <- try(fasterize(amph_diss[ii,], tmp_rast))
-  if(class(tmp_rast) == "RasterLayer" & !all(is.na(tmp_rast[]))){
-    writeRaster(tmp_rast, here("data/raw/IUCN/Amph/",paste0(as.character(amph_diss[ii,]$binomial), "_", amph_diss[ii,]$seasonal, ".tif")),
-                overwrite = TRUE)
-  }
-  rm(tmp_rast)
-}
-
+################################################################################
+# NOT NEEDED FOR IUCN_AOH DATA
+# setwd("E:/Richard/IUCN_AOH/Spatial_data/")
+# 
 # #####
-# # Birds
+# # Amphibians
 # #####
-
-if(!file.exists(here("data/raw/IUCN/bird_diss.rds"))){
-  # setwd(basewd)
-  
-  setwd("BOTW/BOTW_Jeff/")
-  
-  bird <- st_read("BOTW.gdb", "All_Species", stringsAsFactors = FALSE)
-  
-  #filter out:
-  # presence other than 1 (extant)
-  # seasonal 3 (passage) and 4 (seasonal occurrence uncertain)
-  # origin 3 (introduced), 4 (vagrant), 5 (origin uncertain)
-  bird_red <- bird %>% filter(PRESENCE == 1, SEASONAL <= 3, ORIGIN <= 2)
-  
-  ### Start Jeff
-  repair_threads <- 5
-  ## Shuffle data to balance parallel operations
-  input_data <- bird_red[sample.int(nrow(bird_red)), ]
-  
-  ## Repair data
-  input_data2 <- input_data %>% sf::st_set_precision(1e+10) %>%
-    st_parallel_make_valid(repair_threads)
-  
-  ## Project data
-  input_data3 <- input_data2 %>% sf::st_transform(crs = "+proj=eck4 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
-  
-  ## Remove slivers
-  input_data4 <- input_data3 %>% sf::st_cast("POLYGON")
-  input_data5 <- input_data4[as.numeric(sf::st_area(input_data)) > 1, ]
-  
-  ## Repair data
-  input_data6 <- input_data5 %>% lwgeom::st_snap_to_grid(1)
-  input_data7 <- input_data6 %>% st_parallel_make_valid(repair_threads)
-  input_data8 <- input_data7 %>% sf::st_simplify(preserveTopology = TRUE, dTolerance = 1000)
-  input_data9 <- input_data8 %>% st_parallel_make_valid(repair_threads)
-  input_data9 <- input_data9 %>% st_buffer(1)
-  ## Dissolve by species id
-  input_data10 <- input_data9 %>% group_by(SCINAME, SEASONAL) %>%
-    summarise() %>% ungroup()
-  
-  ## Repair data
-  # input_data11 <- input_data9 %>% st_parallel_make_valid(repair_threads)
-  # 
-  # ## Extract polygons
-  # input_data12 <- input_data11 %>% st_subset_polygons()
-  # 
-  # ## Convert to SpatialPolygonsDataFrame
-  # input_data13 <- as(input_data12, "Spatial")
-  
-  # Exports
-  ## Save rds file
-  # saveRDS(input_data, output_path, compress = "xz")
-  beepr::beep(3)
-  
-  ### End Jeff
-  bird_diss <- st_as_sf(input_data10)
-  
-  saveRDS(bird_diss, here("data/raw/IUCN/bird_diss.rds"))
-  
-} else {
-  bird_diss <- readRDS(here("data/raw/IUCN/bird_diss.rds"))
-}
-
-# bird_diss %<>% group_by(SCINAME) %>%
-#   summarise() %>% ungroup()
-# tt <- bird_diss %>% summarise()
-  
-  
-for(ii in 1:nrow(bird_diss)){
-  tmp_rast <- base_raster
-  tmp_rast <- try(fasterize(bird_diss[ii,], tmp_rast))
-  if(class(tmp_rast) == "RasterLayer" & !all(is.na(tmp_rast[]))){
-    writeRaster(tmp_rast, here("data/raw/IUCN/Bird/",paste0(as.character(bird_diss[ii,]$SCINAME), "_", bird_diss[ii,]$SEASONAL, ".tif")),
-                overwrite = TRUE)
-  }
-  rm(tmp_rast)
-}
-
-#####
-# Mammals
-#####
-
-if(!file.exists(here("data/raw/IUCN/mamm_diss.rds"))){
-  # setwd(basewd)
-  
-  setwd("TERRESTRIAL_MAMMALS/")
-  
-  mamm <- st_read("TERRESTRIAL_MAMMALS.shp")
-  #filter out:
-  # presence other than 1 (extant)
-  # seasonal 3 (passage) and 4 (seasonal occurrence uncertain)
-  # origin 3 (introduced), 4 (vagrant), 5 (origin uncertain)
-  mamm_red <- mamm %>% filter(presence == 1, seasonal <= 3, origin <= 2)
-  
-  mamm_proj <- mamm_red %>% st_transform(crs = "+proj=eck4 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
-  mamm_proj <- mamm_proj %>% st_make_valid()
-  mamm_diss <- mamm_proj %>% group_by(binomial, seasonal) %>% summarise()
-  
-  saveRDS(mamm_diss, here("data/raw/IUCN/mamm_diss.rds"))
-
-} else {
-  mamm_diss <- readRDS(here("data/raw/IUCN/mamm_diss.rds"))
-}
-
-
-mamm_rast <- raster(mamm_diss, res = 10000)
-
-for(ii in 1:nrow(mamm_diss)){
-  tmp_rast <- base_raster
-  tmp_rast <- try(fasterize(mamm_diss[ii,], tmp_rast))
-  if(class(tmp_rast) == "RasterLayer" & !all(is.na(tmp_rast[]))){
-    writeRaster(tmp_rast, here("data/raw/IUCN/Mamm/",paste0(as.character(mamm_diss[ii,]$binomial), "_", mamm_diss[ii,]$seasonal, ".tif")),
-                overwrite = TRUE)
-  }
-  rm(tmp_rast)
-}
-
-#####
-# Reptiles
-#####
-
-if(!file.exists(here("data/raw/IUCN/rept_diss.rds"))){
-  # setwd(basewd)
-  
-  setwd("REPTILES/")
-  
-  rept <- st_read("REPTILES.shp")
-  #filter out:
-  # presence other than 1 (extant)
-  # seasonal 3 (passage) and 4 (seasonal occurrence uncertain)
-  # origin 3 (introduced), 4 (vagrant), 5 (origin uncertain)
-  rept_red <- rept %>% filter(presence == 1, seasonal <= 3, origin <= 2)
-  
-  rept_proj <- rept_red %>% st_transform(crs = "+proj=eck4 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
-  rept_proj <- rept_proj %>% st_make_valid()
-  rept_diss <- rept_proj %>% group_by(binomial, seasonal) %>% summarise()
-  
-  saveRDS(rept_diss, here("data/raw/IUCN/rept_diss.rds"))
-  
-} else {
-  rept_diss <- readRDS(here("data/raw/IUCN/rept_diss.rds"))
-}
-
- 
-
-rept_rast <- raster(rept_diss, res = 10000)
-
-for(ii in 1:nrow(rept_diss)){
-  tmp_rast <- base_raster
-  tmp_rast <- try(fasterize(rept_diss[ii,], tmp_rast))
-  if(class(tmp_rast) == "RasterLayer" & !all(is.na(tmp_rast[]))){
-    writeRaster(tmp_rast, here("data/raw/IUCN/Rept/",paste0(as.character(rept_diss[ii,]$binomial), "_", rept_diss[ii,]$seasonal, ".tif")),
-                overwrite = TRUE)
-  }
-  rm(tmp_rast)
-}
-
+# 
+# if(!file.exists(here("data/raw/IUCN_AOH/amph_diss.rds"))){
+#   basewd <- setwd("AMPHIBIANS/")
+#   
+#   amph <- st_read("AMPHIBIANS.shp")
+#   #filter out:
+#   # presence other than 1 (extant)
+#   # seasonal 3 (passage) and 4 (seasonal occurrence uncertain)
+#   # origin 3 (introduced), 4 (vagrant), 5 (origin uncertain)
+#   amph_red <- amph %>% filter(presence == 1, seasonal <= 3, origin <= 2)
+#   
+#   amph_proj <- amph_red %>% st_transform(crs = "+proj=eck4 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
+#   amph_proj <- amph_proj %>% st_make_valid()
+#   
+#   ##NEED TO GROUP BY BINOMIAL AND SEASONAL TO CAPTURE RESIDENT, BREEDING, AND NON-BREEDING
+#   amph_diss <- amph_proj %>% group_by(binomial, seasonal) %>% summarise()
+#   
+#   saveRDS(amph_diss, here("data/raw/IUCN_AOH/amph_diss.rds"))
+#   
+# } else {
+#   amph_diss <- readRDS(here("data/raw/IUCN_AOH/amph_diss.rds"))
+# }
+# 
+# 
+# for(ii in 1:nrow(amph_diss)){
+#   tmp_rast <- base_raster
+#   tmp_rast <- try(fasterize(amph_diss[ii,], tmp_rast))
+#   if(class(tmp_rast) == "RasterLayer" & !all(is.na(tmp_rast[]))){
+#     writeRaster(tmp_rast, here("data/raw/IUCN_AOH/Amph/",paste0(as.character(amph_diss[ii,]$binomial), "_", amph_diss[ii,]$seasonal, ".tif")),
+#                 overwrite = TRUE)
+#   }
+#   rm(tmp_rast)
+# }
+# 
+# # #####
+# # # Birds
+# # #####
+# 
+# if(!file.exists(here("data/raw/IUCN_AOH/bird_diss.rds"))){
+#   # setwd(basewd)
+#   
+#   setwd("BOTW/BOTW_Jeff/")
+#   
+#   bird <- st_read("BOTW.gdb", "All_Species", stringsAsFactors = FALSE)
+#   
+#   #filter out:
+#   # presence other than 1 (extant)
+#   # seasonal 3 (passage) and 4 (seasonal occurrence uncertain)
+#   # origin 3 (introduced), 4 (vagrant), 5 (origin uncertain)
+#   bird_red <- bird %>% filter(PRESENCE == 1, SEASONAL <= 3, ORIGIN <= 2)
+#   
+#   ### Start Jeff
+#   repair_threads <- 5
+#   ## Shuffle data to balance parallel operations
+#   input_data <- bird_red[sample.int(nrow(bird_red)), ]
+#   
+#   ## Repair data
+#   input_data2 <- input_data %>% sf::st_set_precision(1e+10) %>%
+#     st_parallel_make_valid(repair_threads)
+#   
+#   ## Project data
+#   input_data3 <- input_data2 %>% sf::st_transform(crs = "+proj=eck4 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
+#   
+#   ## Remove slivers
+#   input_data4 <- input_data3 %>% sf::st_cast("POLYGON")
+#   input_data5 <- input_data4[as.numeric(sf::st_area(input_data)) > 1, ]
+#   
+#   ## Repair data
+#   input_data6 <- input_data5 %>% lwgeom::st_snap_to_grid(1)
+#   input_data7 <- input_data6 %>% st_parallel_make_valid(repair_threads)
+#   input_data8 <- input_data7 %>% sf::st_simplify(preserveTopology = TRUE, dTolerance = 1000)
+#   input_data9 <- input_data8 %>% st_parallel_make_valid(repair_threads)
+#   input_data9 <- input_data9 %>% st_buffer(1)
+#   ## Dissolve by species id
+#   input_data10 <- input_data9 %>% group_by(SCINAME, SEASONAL) %>%
+#     summarise() %>% ungroup()
+#   
+#   ## Repair data
+#   # input_data11 <- input_data9 %>% st_parallel_make_valid(repair_threads)
+#   # 
+#   # ## Extract polygons
+#   # input_data12 <- input_data11 %>% st_subset_polygons()
+#   # 
+#   # ## Convert to SpatialPolygonsDataFrame
+#   # input_data13 <- as(input_data12, "Spatial")
+#   
+#   # Exports
+#   ## Save rds file
+#   # saveRDS(input_data, output_path, compress = "xz")
+#   beepr::beep(3)
+#   
+#   ### End Jeff
+#   bird_diss <- st_as_sf(input_data10)
+#   
+#   saveRDS(bird_diss, here("data/raw/IUCN_AOH/bird_diss.rds"))
+#   
+# } else {
+#   bird_diss <- readRDS(here("data/raw/IUCN_AOH/bird_diss.rds"))
+# }
+# 
+# # bird_diss %<>% group_by(SCINAME) %>%
+# #   summarise() %>% ungroup()
+# # tt <- bird_diss %>% summarise()
+#   
+#   
+# for(ii in 1:nrow(bird_diss)){
+#   tmp_rast <- base_raster
+#   tmp_rast <- try(fasterize(bird_diss[ii,], tmp_rast))
+#   if(class(tmp_rast) == "RasterLayer" & !all(is.na(tmp_rast[]))){
+#     writeRaster(tmp_rast, here("data/raw/IUCN_AOH/Bird/",paste0(as.character(bird_diss[ii,]$SCINAME), "_", bird_diss[ii,]$SEASONAL, ".tif")),
+#                 overwrite = TRUE)
+#   }
+#   rm(tmp_rast)
+# }
+# 
+# #####
+# # Mammals
+# #####
+# 
+# if(!file.exists(here("data/raw/IUCN_AOH/mamm_diss.rds"))){
+#   # setwd(basewd)
+#   
+#   setwd("TERRESTRIAL_MAMMALS/")
+#   
+#   mamm <- st_read("TERRESTRIAL_MAMMALS.shp")
+#   #filter out:
+#   # presence other than 1 (extant)
+#   # seasonal 3 (passage) and 4 (seasonal occurrence uncertain)
+#   # origin 3 (introduced), 4 (vagrant), 5 (origin uncertain)
+#   mamm_red <- mamm %>% filter(presence == 1, seasonal <= 3, origin <= 2)
+#   
+#   mamm_proj <- mamm_red %>% st_transform(crs = "+proj=eck4 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
+#   mamm_proj <- mamm_proj %>% st_make_valid()
+#   mamm_diss <- mamm_proj %>% group_by(binomial, seasonal) %>% summarise()
+#   
+#   saveRDS(mamm_diss, here("data/raw/IUCN_AOH/mamm_diss.rds"))
+# 
+# } else {
+#   mamm_diss <- readRDS(here("data/raw/IUCN_AOH/mamm_diss.rds"))
+# }
+# 
+# 
+# mamm_rast <- raster(mamm_diss, res = 10000)
+# 
+# for(ii in 1:nrow(mamm_diss)){
+#   tmp_rast <- base_raster
+#   tmp_rast <- try(fasterize(mamm_diss[ii,], tmp_rast))
+#   if(class(tmp_rast) == "RasterLayer" & !all(is.na(tmp_rast[]))){
+#     writeRaster(tmp_rast, here("data/raw/IUCN_AOH/Mamm/",paste0(as.character(mamm_diss[ii,]$binomial), "_", mamm_diss[ii,]$seasonal, ".tif")),
+#                 overwrite = TRUE)
+#   }
+#   rm(tmp_rast)
+# }
+# 
+# #####
+# # Reptiles
+# #####
+# 
+# if(!file.exists(here("data/raw/IUCN_AOH/rept_diss.rds"))){
+#   # setwd(basewd)
+#   
+#   setwd("REPTILES/")
+#   
+#   rept <- st_read("REPTILES.shp")
+#   #filter out:
+#   # presence other than 1 (extant)
+#   # seasonal 3 (passage) and 4 (seasonal occurrence uncertain)
+#   # origin 3 (introduced), 4 (vagrant), 5 (origin uncertain)
+#   rept_red <- rept %>% filter(presence == 1, seasonal <= 3, origin <= 2)
+#   
+#   rept_proj <- rept_red %>% st_transform(crs = "+proj=eck4 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
+#   rept_proj <- rept_proj %>% st_make_valid()
+#   rept_diss <- rept_proj %>% group_by(binomial, seasonal) %>% summarise()
+#   
+#   saveRDS(rept_diss, here("data/raw/IUCN_AOH/rept_diss.rds"))
+#   
+# } else {
+#   rept_diss <- readRDS(here("data/raw/IUCN_AOH/rept_diss.rds"))
+# }
+# 
+#  
+# 
+# rept_rast <- raster(rept_diss, res = 10000)
+# 
+# for(ii in 1:nrow(rept_diss)){
+#   tmp_rast <- base_raster
+#   tmp_rast <- try(fasterize(rept_diss[ii,], tmp_rast))
+#   if(class(tmp_rast) == "RasterLayer" & !all(is.na(tmp_rast[]))){
+#     writeRaster(tmp_rast, here("data/raw/IUCN_AOH/Rept/",paste0(as.character(rept_diss[ii,]$binomial), "_", rept_diss[ii,]$seasonal, ".tif")),
+#                 overwrite = TRUE)
+#   }
+#   rm(tmp_rast)
+# }
+################################################################################
 
 
 #####
