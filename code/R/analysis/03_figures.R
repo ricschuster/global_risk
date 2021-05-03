@@ -19,8 +19,11 @@ dr <- 100
 data_resolution <- paste0(dr, "km2")
 
 #land
-land <- st_as_sf(ne_download(scale = 50, type = 'land', category = 'physical'))
-countries <- st_as_sf(ne_download(scale = 50, type = 'countries', category = 'cultural'))
+# land <- st_as_sf(ne_download(scale = 50, type = 'land', category = 'physical'))
+# countries <- st_as_sf(ne_download(scale = 50, type = 'countries', category = 'cultural'))
+
+land <- st_read(here("data/raw/ne/ne_50m_land.shp"))
+countries <- st_read(here("data/raw/ne/ne_50m_admin_0_countries.shp"))
 
 #protected 
 wdpa <- raster(here("data/intermediate/100km2/", "wdpa_terrestrial.tif"))
@@ -380,7 +383,7 @@ dev.off()
 #################################################################################################
 #Figure S4
 #################################################################################################
-trm <- raster(here("data/raw/IUCN/richness_10km_Birds_v7_spp_edited_tax_extant_1m_dense_EckertIV_1m_dissolved_Passeriformes_raster2.tif"))
+trm <- raster(here("data/raw/IUCN_AOH/Amph/Abavorana luctuosa_aoh_10km.tif"))
 base_raster <- raster(trm) 
 res(base_raster) <- sqrt(dr) * 1000
 
