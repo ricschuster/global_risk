@@ -16,6 +16,7 @@ library(here)
 ## Define functions
 source(here("code/R/functions/multi-objective-prioritization.R"))
 source(here("code/R/functions/perm.R"))
+source(here("code/R/functions/calculate-targets.R"))
 
 # parallelization
 # n_cores <- 2
@@ -93,6 +94,15 @@ rij_mat <- as(rij, "TsparseMatrix")
 rij_mat_red <- rij_mat[, keep]
 rij_mat_use <- as(rij_mat_red, "dgCMatrix")
 
+# total across all planning units
+# for biodiversity features, values are % of cell occupied
+# aoh = area of planning unit times total representation / 100
+# set biodiversity targets
+features <- rowSums(rij_mat_use) %>% 
+  enframe(value = "aoh") %>% 
+  # set target based on aoh
+  mutate(prop0 = calculate_targets(aoh))
+
 wb_val <- wb_mean[][!is.na(pu[])]
 wb_val_red <- wb_val[keep]
 wb_val_red <- (wb_val_red + min(wb_val_red)) * -1
@@ -157,7 +167,7 @@ runs <- foreach(run = 1:nrow(runs), .combine = bind_rows) %do% {
   s_gur <- multiobjective_prioritization(rij = rij_mat_use,
                                          obj = cost_temp,
                                          pu_locked_in = locked_in_red,
-                                         relative_target = rep(0.30, nrow(rij)),
+                                         relative_target = features$prop0,
                                          gap = gap_temp,
                                          flip_priority = r$flip_priority,
                                          threads = parallel::detectCores() - 6)
