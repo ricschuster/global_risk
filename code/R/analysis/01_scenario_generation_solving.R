@@ -250,7 +250,7 @@ round(sum_tab * 100 / (land_area * 1000000) * 100, 2)[-15]
 dr <- 100
 data_resolution <- paste0(dr, "km2")
 
-trm <- raster(here("data/raw/IUCN_AOH/Amphibians_AOH_10km/Abavorana luctuosa_aoh_10km.tif"))
+trm <- raster(here("data/raw/IUCN_AOH/Amph/Abavorana luctuosa_aoh_10km.tif"))
 base_raster <- raster(trm) 
 res(base_raster) <- sqrt(dr) * 1000
 
