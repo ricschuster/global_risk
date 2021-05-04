@@ -497,7 +497,7 @@ icon_clim <- readPNG(here("manuscript/figures/", "icon_clim.png"))
 
 
 here("manuscript/figures", paste0("Figure X. Zoom", ".png")) %>%
-  png(width = 3600 * 3, height = 4000 * 1, res = 500)
+  png(width = 3600 * 1, height = 4000 * 1/3, res = 500/3)
 
 par(mfrow=c(2, 3),
     mar = c(0, 0, 0, 0),
