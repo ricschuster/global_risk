@@ -15,7 +15,7 @@ source(here("code/R/functions/geo.R"))
 dr <- 100
 data_resolution <- paste0(dr, "km2")
 
-trm <- raster(here("data/raw/IUCN_AOH/Amphibians_AOH_10km/Abavorana luctuosa_aoh_10km.tif"))
+trm <- raster(here("data/raw/IUCN_AOH/Amph/Abavorana luctuosa_aoh_10km.tif"))
 base_raster <- raster(trm) 
 res(base_raster) <- sqrt(dr) * 1000
 
@@ -302,6 +302,23 @@ gar_stack <- stack(garc_P_stack, garc_T_stack)
 gar_stack %>%   projectRaster(crs = proj4string(base_raster), method = "ngb") %>%
   resample(base_raster, method = "ngb") %>%
   writeRaster(here("data/intermediate/", data_resolution, "climate"), format = "GTiff", bylayer = TRUE, suffix = 'names')
+
+#####
+# Climate Patrick
+#####
+pat_vocc_bio1 <- raster(here("data/raw/Climate/Patrick/vocc_bio1_he8570_30s.tif"))
+land <- raster(here("data/intermediate/", data_resolution, "land.tif"))
+
+pat_vocc_bio1 <- pat_vocc_bio1 %>%   projectRaster(crs = proj4string(base_raster), method = "ngb") %>%
+  resample(base_raster, method = "ngb") 
+
+pat_vocc_bio1_val <- pat_vocc_bio1[]
+pat_vocc_bio1_val <- ifelse(!is.na(land[]), pat_vocc_bio1_val, NA) 
+pat_vocc_bio1[] <- pat_vocc_bio1_val
+
+pat_vocc_bio1 %>% 
+  writeRaster(here("data/intermediate/", data_resolution, "climate_pat_vocc_bio1.tif"), format = "GTiff", overwrite = TRUE)
+
 
 #####
 # World Bank
