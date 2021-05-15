@@ -26,6 +26,9 @@ source(here("code/R/functions/calculate-targets.R"))
 dr <- 100
 data_resolution <- paste0(dr, "km2")
 
+# what climate layer should be used
+clim <- "climate_pat_vocc_bio1.tif"
+
 pu <- raster(here("data/intermediate/", data_resolution, "land.tif"))
 wdpa <- raster(here("data/intermediate/", data_resolution, "wdpa_terrestrial.tif"))
 locked_in <- ifelse(!is.na(wdpa[][!is.na(pu[])]), TRUE, FALSE)
@@ -81,12 +84,12 @@ if( !file.exists(paste0("data/intermediate/", data_resolution, "/rij.rds"))){
 wb_mean <- raster(here("data/intermediate/", data_resolution, "wb_mean.tif"))
 lands <- raster(here("data/intermediate/", data_resolution, "kehoe_land_system.tif"))
 # clim_grid_ann <- raster(here("data/intermediate/", data_resolution, "probability-annual-iucn.tif"))
-clim <- raster(here("data/intermediate/", data_resolution, "climate_frank_ehe.tif"))
+climr <- raster(here("data/intermediate/", data_resolution, clim))
 ###
 # only keep values that are present in all 3 threat layers
 ###
 
-cdf <- as.data.frame(stack(pu, wb_mean, lands, clim))
+cdf <- as.data.frame(stack(pu, wb_mean, lands, climr))
 cdf_red <- cdf[!is.na(cdf$land), ]
 keep <- !is.na(rowSums(cdf_red))
 
@@ -111,7 +114,7 @@ lands_val <- lands[][!is.na(pu[])]
 lands_val_red <- lands_val[keep]
 lands_val_red <- (lands_val_red - 100) * -1
 
-clim_val <- clim[][!is.na(pu[])]
+clim_val <- climr[][!is.na(pu[])]
 clim_val_red <- clim_val[keep]
 clim_val_red <- ((clim_val_red - min(clim_val_red)) * 100) + 0.01
 
@@ -143,8 +146,9 @@ runs <- tibble(name = list(c("S", "L", "C", "A")),
                flip_priority = FALSE,
                gap = rep(0.1, 16))
 
-
-runs_dir <- here("data", "final", data_resolution)
+dir.create(file.path(here("data", "final", paste0(clim, data_resolution))), 
+           showWarnings = FALSE)
+runs_dir <- here("data", "final", paste0(clim, data_resolution))
 # gap <- 0.1
 # 
 # flip_priority <- FALSE
@@ -207,7 +211,8 @@ land <- raster(here("data/intermediate/", data_resolution, "land.tif"))
 land_area <- sum(land[], na.rm = TRUE) * prod(res(land))/1000000 /1000000
 
 
-fls <- list.files(here("data/final/", data_resolution), pattern = "*.tif$", full.names = TRUE)[1:16]
+fls <- list.files(here("data", "final", paste0(clim, data_resolution)), 
+                  pattern = "*.tif$", full.names = TRUE)[1:16]
 nms <- gsub(".tif", "", fls) %>% 
   gsub(here("data/final/", data_resolution,"solution_run-"), "", .)
 
@@ -233,8 +238,7 @@ selected - prot
 
 data.frame(t(data.frame(perc_tot = round(perc_tot, 2),
                         perc_increse = round(perc_increse, 2)))) %>%
-  write.csv(here("data/final/", data_resolution, "Table1.csv"))
-
+  write.csv(here("data", "final", paste0(clim, data_resolution), "Table1.csv"))
 
 out_sum <- sum(r_stack[[-1]])
 values(out_sum)[values(out_sum) == 0] <-  NA
@@ -300,12 +304,12 @@ count_sum_t <- mutate_all(count_sum_t, function(x) as.numeric(as.character(x)))
 row.names(count_sum_t) <- rwnms
 # %>% tally()
 
-count_sum_t %>% write.csv(here("data/final/", data_resolution, "country_summaries.csv"))
+count_sum_t %>% write.csv(here("data", "final", paste0(clim, data_resolution), "country_summaries.csv"))
 
 n_cell_count <- count_df %>% group_by(NAME_0) %>% summarise(n=n())
 
 round(t(t(count_sum_t) / n_cell_count$n * 100), 2) %>%
-  write.csv(here("data/final/", data_resolution, "country_summaries_perc.csv"))
+  write.csv(here("data", "final", paste0(clim, data_resolution), "country_summaries_perc.csv"))
 
 
 # clean up
@@ -318,7 +322,7 @@ is.na(count_sum_2) <- sapply(count_sum_2, is.infinite)
 count_sum_2[is.na(count_sum_2)] <- NA
 
 count_sum_2 %>% 
-  write.csv(here("data/final/", data_resolution, "Table2_detail.csv"))
+  write.csv(here("data", "final", paste0(clim, data_resolution), "Table2_detail.csv"))
 
 c_sum_tab <- data.frame(scenario = row.names(count_sum_2),
                         mean = apply(count_sum_2, 1, function(x) mean(x, na.rm = TRUE)),
@@ -328,7 +332,7 @@ c_sum_tab <- data.frame(scenario = row.names(count_sum_2),
                         high = apply(count_sum_2, 1, function(x) quantile(x, prob = 0.95, na.rm = TRUE)))
 
 c_sum_tab %>% 
-  write.csv(here("data/final/", data_resolution, "Table2.csv"), row.names = FALSE)
+  write.csv(here("data", "final", paste0(clim, data_resolution), "Table2.csv"), row.names = FALSE)
 
 
 rng <- colMaxs(as.matrix(count_sum_2), value = T) - colMins(as.matrix(count_sum_2), value = T)

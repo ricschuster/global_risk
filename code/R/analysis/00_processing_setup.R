@@ -12,6 +12,13 @@ library(here)
 ## Define functions
 source(here("code/R/functions/geo.R"))
 
+# set raster processing options
+raster::rasterOptions(
+  maxmemory = 1.0e+11, #100GB
+  chunksize = 1.0e+10 #10GB
+  )
+
+
 dr <- 100
 data_resolution <- paste0(dr, "km2")
 
@@ -306,7 +313,8 @@ gar_stack %>%   projectRaster(crs = proj4string(base_raster), method = "ngb") %>
 #####
 # Climate Patrick
 #####
-pat_vocc_bio1 <- raster(here("data/raw/Climate/Patrick/vocc_bio1_he8570_30s.tif"))
+pat_vocc_bio1 <- raster(here("data/raw/Climate/Patrick/vocc_bio1_he8570_30s.tif")) %>%
+  readAll()
 land <- raster(here("data/intermediate/", data_resolution, "land.tif"))
 
 pat_vocc_bio1 <- pat_vocc_bio1 %>%   projectRaster(crs = proj4string(base_raster), method = "ngb") %>%
