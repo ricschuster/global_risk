@@ -481,11 +481,11 @@ lndu <- base + out_r$L * 2
 lndu[lndu < 1] <- NA
 lndu <- as.factor(lndu)
 
-clim <- raster(here("data/intermediate/", data_resolution, "climate_frank_ehe.tif"))
-clim <- ((clim - min(clim[], na.rm=T)) * 100) + 0.01
+climr <- raster(here("data/intermediate/", data_resolution, "climate_frank_ehe.tif"))
+climr <- ((climr - min(climr[], na.rm=T)) * 100) + 0.01
 
-clim <- round(clim, 2)
-breaks <- classIntervals(clim[!is.na(clim)], n = 10, style = "quantile")
+climr <- round(climr, 2)
+breaks <- classIntervals(climr[!is.na(climr)], n = 10, style = "quantile")
 
 
 clr_col = c('#a6611a', '#018571', '#5e3c99')
@@ -497,9 +497,9 @@ clr <- as.factor(clr)
 pal <- brewer.pal(9, 'YlGnBu')
 pal <- colorRampPalette(pal)
 
-icon_gov <- readPNG(here("manuscript/figures/", "icon_gov.png"))
-icon_land <- readPNG(here("manuscript/figures/", "icon_land.png"))
-icon_clim <- readPNG(here("manuscript/figures/", "icon_clim.png"))
+icon_gov <- readPNG(here("manuscript", paste0("figures", "_", clim), "icon_gov.png"))
+icon_land <- readPNG(here("manuscript", paste0("figures", "_", clim), "icon_land.png"))
+icon_clim <- readPNG(here("manuscript", paste0("figures", "_", clim), "icon_clim.png"))
 
 
 here("manuscript", paste0("figures", "_", clim), paste0("Figure X. Zoom", ".png")) %>%
@@ -550,10 +550,10 @@ box()
 
 #Climate layer
 land$geometry %>% st_crop(ce) %>% plot(col = "grey95", border = NA)
-plot(clim, add = TRUE, col = pal(10), breaks = breaks$brks,
-     maxpixels = ncell(clim), legend = FALSE)
+plot(climr, add = TRUE, col = pal(10), breaks = breaks$brks,
+     maxpixels = ncell(climr), legend = FALSE)
 countries$geometry%>% plot(col = NA, lwd = 1, border = "white", add = TRUE)
-plot(clim, legend.only=TRUE, col = pal(10),
+plot(climr, legend.only=TRUE, col = pal(10),
      breaks = round(breaks$brks,2),
      # legend.width = 1, legend.shrink = 0.75,
      smallplot=c(0.08, 0.10, 0.5, 0.9),
