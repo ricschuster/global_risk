@@ -84,7 +84,7 @@ if( !file.exists(paste0("data/intermediate/", data_resolution, "/rij.rds"))){
 wb_mean <- raster(here("data/intermediate/", data_resolution, "wb_mean.tif"))
 lands <- raster(here("data/intermediate/", data_resolution, "kehoe_land_system.tif"))
 # clim_grid_ann <- raster(here("data/intermediate/", data_resolution, "probability-annual-iucn.tif"))
-climr <- raster(here("data/intermediate/", data_resolution, "_", clim))
+climr <- raster(here("data/intermediate/", data_resolution, clim))
 ###
 # only keep values that are present in all 3 threat layers
 ###
@@ -116,7 +116,7 @@ lands_val_red <- (lands_val_red - 100) * -1
 
 clim_val <- climr[][!is.na(pu[])]
 clim_val_red <- clim_val[keep]
-clim_val_red <- ((clim_val_red - min(clim_val_red)) * 100) + 0.01
+clim_val_red <- ((clim_val_red - min(clim_val_red))) + 0.01
 
 locked_in_red <- locked_in[keep]
 
@@ -156,6 +156,10 @@ runs <- foreach(run = 1:nrow(runs), .combine = bind_rows) %do% {
   
   r <- runs[run, ]
   r$name_out <- paste(r$name[[1]][r$scen[[1]]], collapse = "")
+  
+  if(!any(r$scen[[1]] %in% 3)){
+    return(NULL)
+  }
   
   # Start the loop from index >1
   # if(run < 8) return(NULL)

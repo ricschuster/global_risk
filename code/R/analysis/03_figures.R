@@ -346,9 +346,8 @@ dev.off()
 #################################################################################################
 # clim_grid_ann <- raster(here("data/intermediate/", data_resolution, "probability-annual-iucn.tif"))
 #################################################################################################
-clim <- raster(here("data/intermediate/", data_resolution, "climate_frank_ehe.tif"))
-clim <- ((clim - min(clim[], na.rm=T)) * 100) + 0.01
-
+climr <- raster(here("data/intermediate/", data_resolution, clim))
+climr <- (climr - min(climr[], na.rm = T)) + 0.01
 
 here("manuscript", paste0("figures", "_", clim), paste0("Figure S3. Climate", ".png")) %>%
   png(width = 3600 * 4, height = 2000 * 4, res = 500)
@@ -363,19 +362,19 @@ plot(land$geometry, col = "grey", border = NA)
 pal <- brewer.pal(9, 'YlGnBu')
 pal <- colorRampPalette(pal)
 
-clim <- round(clim, 2)
-breaks <- classIntervals(clim[!is.na(clim)], n = 10, style = "quantile")
+# climr <- round(climr, 2)
+breaks <- classIntervals(climr[!is.na(climr)], n = 10, style = "quantile")
 
 # levelplot(gadm_country2, at = breaks$brks, col.regions = colorRampPalette(brewer.pal(9, 'YlOrRd')),
 #           margin=FALSE)
 
-plot(clim, add = TRUE, col = pal(10), breaks = breaks$brks,
-     maxpixels = ncell(clim), legend = FALSE)
+plot(climr, add = TRUE, col = pal(10), breaks = breaks$brks,
+     maxpixels = ncell(climr), legend = FALSE)
 
 plot(countries$geometry, col = NA, lwd = 0.5, add = TRUE)
 
-plot(clim, legend.only=TRUE, col = pal(10),
-     breaks = round(breaks$brks,2),
+plot(climr, legend.only=TRUE, col = pal(10),
+     breaks = round(breaks$brks,4),
      # legend.width = 1, legend.shrink = 0.75,
      smallplot=c(0.17, 0.18, 0.15, 0.55),
      axis.args=list(#at=seq(r.range[1], r.range[2], 25),
