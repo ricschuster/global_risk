@@ -402,7 +402,7 @@ gc <- ggplot(gg_df, aes(x = climate, y = CA)) +
   geom_smooth(method = "lm")
 
 ggarrange(gs, gl, gc, ncol = 3, nrow = 1) %>%
-  ggexport(filename = here("manuscript/figures", paste0("Figure 4", ".png")),
+  ggexport(filename = here("manuscript", paste0("figures", "_", clim), paste0("Figure 4", ".png")),
            width = 2500 , height = 1000 , res = 400)
 
 is.na(gg_df) <- sapply(gg_df, is.infinite)
