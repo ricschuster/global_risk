@@ -514,7 +514,7 @@ par(mfrow=c(2, 3),
 # e <- drawExtent()
 ge <- extent(c(132508.5, 3551884, 6211332, 8118213))
 le <- extent(c(-1441500, -495817.2, 545954.3, 1448894))
-ce <- extent(c(-1049678, 2468960, 2375318, 4853313))
+ce <- extent(c(930639, 2117044, 5092249, 6117100))
 
 #Governance layer
 land$geometry %>% st_crop(ge) %>% plot(col = "grey95", border = NA)
@@ -552,7 +552,7 @@ box()
 land$geometry %>% st_crop(ce) %>% plot(col = "grey95", border = NA)
 plot(climr, add = TRUE, col = pal(10), breaks = breaks$brks,
      maxpixels = ncell(climr), legend = FALSE)
-countries$geometry%>% plot(col = NA, lwd = 1, border = "white", add = TRUE)
+countries$geometry%>% plot(col = NA, lwd = 1, border = "black", add = TRUE)
 plot(climr, legend.only=TRUE, col = pal(10),
      breaks = round(breaks$brks,2),
      # legend.width = 1, legend.shrink = 0.75,
