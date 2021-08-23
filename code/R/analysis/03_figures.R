@@ -183,7 +183,7 @@ plot(land$geometry, col = "grey95", border = NA)
 pal <- brewer.pal(9, 'YlOrRd')
 pal <- colorRampPalette(pal)
 
-plot(out_sum, add = TRUE, col = pal(8), legend = FALSE, 
+plot(out_sum, add = TRUE, col = pal(15), legend = FALSE, 
      maxpixels = ncell(out_sum))
 
 plot(wdpa, add = TRUE, col = "#01665e", legend = FALSE)
@@ -194,6 +194,15 @@ plot(wdpa, add = TRUE, col = "#01665e", legend = FALSE)
 
 # boundaries
 plot(countries$geometry, col = NA, lwd = 0.5, add = TRUE)
+
+plot(out_sum, legend.only=TRUE, col = pal(15),
+     # breaks = breaks$brks, #c(0, 5, 10, 15),
+     # legend.width = 1, legend.shrink = 0.75,
+     smallplot=c(0.17, 0.18, 0.15, 0.55),
+     axis.args=list(#at=seq(r.range[1], r.range[2], 25),
+       #labels=seq(r.range[1], r.range[2], 25),
+       cex.axis = 2),
+     legend.args=list(text='Number of scenarios', side = 2, font=2, line=2.5, cex= 2))
 
 
 dev.off()
