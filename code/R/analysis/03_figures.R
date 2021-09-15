@@ -490,7 +490,7 @@ lndu <- base + out_r$L * 2
 lndu[lndu < 1] <- NA
 lndu <- as.factor(lndu)
 
-climr <- raster(here("data/intermediate/", data_resolution, "climate_frank_ehe.tif"))
+climr <- raster(here("data/intermediate/", data_resolution, "climate_pat_vocc_bio1.tif"))
 climr <- ((climr - min(climr[], na.rm=T)) * 100) + 0.01
 
 climr <- round(climr, 2)
@@ -525,14 +525,17 @@ ge <- extent(c(132508.5, 3551884, 6211332, 8118213))
 le <- extent(c(-1441500, -495817.2, 545954.3, 1448894))
 ce <- extent(c(930639, 2117044, 5092249, 6117100))
 
+country_lwd <- 1.8
+
 #Governance layer
 land$geometry %>% st_crop(ge) %>% plot(col = "grey95", border = NA)
 plot(wb_mean, add = TRUE, col = pal(20), legend = FALSE, 
      maxpixels = ncell(wb_mean))
-countries$geometry%>% plot(col = NA, lwd = 1, border = "black", add = TRUE)
+countries$geometry%>% plot(col = NA, lwd = country_lwd, border = "black", add = TRUE)
 plot(wb_mean, legend.only=TRUE, col = pal(20),
      # breaks = round(breaks$brks,2),
      # legend.width = 1, legend.shrink = 0.75,
+     fill = "white",
      smallplot=c(0.08, 0.10, 0.5, 0.9),
      axis.args=list(#at=seq(r.range[1], r.range[2], 25),
        #labels=seq(r.range[1], r.range[2], 25),
@@ -545,7 +548,7 @@ box()
 land$geometry %>% st_crop(le) %>% plot(col = "grey95", border = NA)
 plot(lands, add = TRUE, col = pal(20), legend = FALSE, 
      maxpixels = ncell(lands))
-countries$geometry%>% plot(col = NA, lwd = 1, border = "black", add = TRUE)
+countries$geometry%>% plot(col = NA, lwd = country_lwd, border = "black", add = TRUE)
 plot(lands, legend.only=TRUE, col = pal(20),
      # breaks = round(breaks$brks,2),
      # legend.width = 1, legend.shrink = 0.75,
@@ -561,7 +564,8 @@ box()
 land$geometry %>% st_crop(ce) %>% plot(col = "grey95", border = NA)
 plot(climr, add = TRUE, col = pal(10), breaks = breaks$brks,
      maxpixels = ncell(climr), legend = FALSE)
-countries$geometry%>% plot(col = NA, lwd = 1, border = "black", add = TRUE)
+countries$geometry%>% plot(col = NA, lwd = country_lwd, border = "black", add = TRUE)
+# rect(xleft = 0.08, ybottom = 0.5, xright = 0.1, ytop = 0.9, col = "white")
 plot(climr, legend.only=TRUE, col = pal(10),
      breaks = round(breaks$brks,2),
      # legend.width = 1, legend.shrink = 0.75,
@@ -579,7 +583,7 @@ land$geometry %>% st_crop(ge) %>% plot(col = "grey95", border = NA)
 
 gov %>% plot(add = TRUE, legend = FALSE, col = gov_col)
 
-countries$geometry%>% plot(col = NA, lwd = 1, border = "black", add = TRUE)
+countries$geometry%>% plot(col = NA, lwd = country_lwd, border = "black", add = TRUE)
 legend(x='topleft', title = "Scenarios", 
        legend = c("null", "governance", "both"), fill = gov_col,
        bty = "n", cex = 2)
@@ -591,7 +595,7 @@ land$geometry %>% st_crop(le) %>% plot(col = "grey95", border = NA)
 
 lndu %>% plot(add = TRUE, legend = FALSE, col = gov_col)
 
-countries$geometry%>% plot(col = NA, lwd = 1, border = "black", add = TRUE)
+countries$geometry%>% plot(col = NA, lwd = country_lwd, border = "black", add = TRUE)
 legend(x='topleft', title = "Scenarios", 
        legend = c("null", "land-use", "both"), fill = land_col,
        bty = "n", cex = 2)
@@ -603,7 +607,7 @@ land$geometry %>% st_crop(ce) %>% plot(col = "grey95", border = NA)
 
 clr %>% plot(add = TRUE, legend = FALSE, col = gov_col)
 
-countries$geometry%>% plot(col = NA, lwd = 1, border = "black", add = TRUE)
+countries$geometry%>% plot(col = NA, lwd = country_lwd, border = "black", add = TRUE)
 legend(x='topleft', title = "Scenarios", 
        legend = c("null", "climate", "both"), fill = clr_col,
        bty = "n", cex = 2)
