@@ -63,7 +63,7 @@ par(mar = c(0.1, 0.1, 0.1, 0.1), oma = c(0,3.5,1.5,0), bg = "white")
 plot(land$geometry, col = "grey95", border = NA)
 # title(names(out_r)[ii], cex.main = 1.5)
 
-plot(out_r[[10]], add = TRUE, col = c(rgb(0,0,0,alpha=0), "#8c510a"), legend = FALSE, 
+plot(out_r[[10]], add = TRUE, col = c(rgb(0,0,0,alpha=0), "#7b3294"), legend = FALSE, 
      maxpixels = ncell(out_r))
 
 plot(wdpa, add = TRUE, col = "#01665e", legend = FALSE)
