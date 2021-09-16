@@ -493,7 +493,7 @@ lndu <- as.factor(lndu)
 climr <- raster(here("data/intermediate/", data_resolution, "climate_pat_vocc_bio1.tif"))
 climr <- ((climr - min(climr[], na.rm=T)) * 100) + 0.01
 
-climr <- round(climr, 2)
+climr <- round(climr, 0)
 breaks <- classIntervals(climr[!is.na(climr)], n = 10, style = "quantile")
 
 
