@@ -556,7 +556,7 @@ plot(lands, legend.only=TRUE, col = pal(20),
      axis.args=list(#at=seq(r.range[1], r.range[2], 25),
        #labels=seq(r.range[1], r.range[2], 25),
        cex.axis = 2),
-     legend.args=list(text='Land-use risk', side = 2, font = 1, line = 1, cex = 2))
+     legend.args=list(text='Land use risk', side = 2, font = 1, line = 1, cex = 2))
 box()
 
 
@@ -597,7 +597,7 @@ lndu %>% plot(add = TRUE, legend = FALSE, col = gov_col)
 
 countries$geometry%>% plot(col = NA, lwd = country_lwd, border = "black", add = TRUE)
 legend(x='topleft', title = "Scenarios", 
-       legend = c("null", "land-use", "both"), fill = land_col,
+       legend = c("null", "land use", "both"), fill = land_col,
        bty = "n", cex = 2)
 box()
 
