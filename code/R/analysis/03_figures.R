@@ -516,7 +516,6 @@ here("manuscript", paste0("figures", "_", clim), paste0("Figure X. Zoom", ".png"
 
 par(mfrow=c(2, 3),
     mar = c(0, 0, 0, 0),
-    cex = 2,
     xpd=TRUE)
 
 #Extents
@@ -561,19 +560,25 @@ box()
 
 
 #Climate layer
-land$geometry %>% st_crop(ce) %>% plot(col = "grey95", border = NA)
-plot(climr, add = TRUE, col = pal(10), breaks = breaks$brks,
+land$geometry %>% st_crop(ce) %>% raster::plot(col = "grey95", border = NA)
+raster::plot(climr, add = TRUE, col = pal(10), breaks = breaks$brks,
      maxpixels = ncell(climr), legend = FALSE)
-countries$geometry%>% plot(col = NA, lwd = country_lwd, border = "black", add = TRUE)
+countries$geometry%>% raster::plot(col = NA, lwd = country_lwd, border = "black", add = TRUE)
 # rect(xleft = 0.08, ybottom = 0.5, xright = 0.1, ytop = 0.9, col = "white")
-plot(climr, legend.only=TRUE, col = pal(10),
+rect(xleft = 322645.7, ybottom = 5503724, xright = 903257.7, ytop = 6285654, col = "white") # coloured
+raster::plot(climr, legend.only=TRUE, col = pal(10),
+
      breaks = round(breaks$brks,2),
+     labels = round(breaks$brks / 100, 0),
+     box.col = "white",bg = "white",
      # legend.width = 1, legend.shrink = 0.75,
      smallplot=c(0.08, 0.10, 0.5, 0.9),
-     axis.args=list(#at=seq(r.range[1], r.range[2], 25),
-       #labels=seq(r.range[1], r.range[2], 25),
+     axis.args=list( at = round(breaks$brks,2),
+       labels = round(breaks$brks / 100, 0),
+
        cex.axis = 2),
      legend.args=list(text='Climate risk', side = 2, font = 1, line = 1, cex = 2))
+
 box()
 
 
@@ -608,6 +613,7 @@ land$geometry %>% st_crop(ce) %>% plot(col = "grey95", border = NA)
 clr %>% plot(add = TRUE, legend = FALSE, col = gov_col)
 
 countries$geometry%>% plot(col = NA, lwd = country_lwd, border = "black", add = TRUE)
+rect(xleft = 322645.7, ybottom = 5543724, xright = 902257.7, ytop = 6285654, col = "white") # coloured
 legend(x='topleft', title = "Scenarios", 
        legend = c("null", "climate", "both"), fill = clr_col,
        bty = "n", cex = 2)
