@@ -327,6 +327,23 @@ pat_vocc_bio1[] <- pat_vocc_bio1_val
 pat_vocc_bio1 %>% 
   writeRaster(here("data/intermediate/", data_resolution, "climate_pat_vocc_bio1.tif"), format = "GTiff", overwrite = TRUE)
 
+#####
+# Climate combined
+#####
+range01 <- function(x){
+  x <- values(x)
+  (x - min(x, na.rm = TRUE))/(max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+  }
+
+climfr <- raster(here("data/intermediate/", data_resolution, "climate_frank_ehe.tif"))
+climpa <- raster(here("data/intermediate/", data_resolution, "climate_pat_vocc_bio1.tif"))
+
+climfr[] <- range01(climfr)
+climpa[] <- range01(climpa)
+clim_mean <- mean(stack(climfr, climpa))
+
+clim_mean %>% 
+  writeRaster(here("data/intermediate/", data_resolution, "climate_comb.tif"), format = "GTiff", overwrite = TRUE)
 
 #####
 # World Bank
