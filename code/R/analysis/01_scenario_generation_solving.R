@@ -27,7 +27,7 @@ dr <- 100
 data_resolution <- paste0(dr, "km2")
 
 # what climate layer should be used
-clim <- "climate_pat_vocc_bio1.tif"
+clim <- "climate_comb.tif"
 
 pu <- raster(here("data/intermediate/", data_resolution, "land.tif"))
 wdpa <- raster(here("data/intermediate/", data_resolution, "wdpa_terrestrial.tif"))
