@@ -19,7 +19,8 @@ dr <- 100
 data_resolution <- paste0(dr, "km2")
 
 # what climate layer should be used
-clim <- "climate_pat_vocc_bio1.tif"
+# clim <- "climate_pat_vocc_bio1.tif"
+clim <- "climate_comb.tif"
 
 dir.create(file.path(here("manuscript", paste0("figures", "_", clim))), 
            showWarnings = FALSE)

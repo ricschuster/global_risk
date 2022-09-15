@@ -27,6 +27,8 @@ dr <- 100
 data_resolution <- paste0(dr, "km2")
 
 # what climate layer should be used
+# clim <- "climate_frank_ehe.tif"
+# clim <- "climate_pat_vocc_bio1.tif"
 clim <- "climate_comb.tif"
 
 pu <- raster(here("data/intermediate/", data_resolution, "land.tif"))
@@ -85,6 +87,7 @@ wb_mean <- raster(here("data/intermediate/", data_resolution, "wb_mean.tif"))
 lands <- raster(here("data/intermediate/", data_resolution, "kehoe_land_system.tif"))
 # clim_grid_ann <- raster(here("data/intermediate/", data_resolution, "probability-annual-iucn.tif"))
 climr <- raster(here("data/intermediate/", data_resolution, clim))
+# climr <- round(climr, 3)
 ###
 # only keep values that are present in all 3 threat layers
 ###
@@ -157,9 +160,9 @@ runs <- foreach(run = 1:nrow(runs), .combine = bind_rows) %do% {
   r <- runs[run, ]
   r$name_out <- paste(r$name[[1]][r$scen[[1]]], collapse = "")
   
-  if(!any(r$scen[[1]] %in% 3)){
-    return(NULL)
-  }
+  # if(!any(r$scen[[1]] %in% 3)){
+  #   return(NULL)
+  # }
   
   # Start the loop from index >1
   # if(run < 8) return(NULL)
