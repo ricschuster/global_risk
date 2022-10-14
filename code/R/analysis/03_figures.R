@@ -19,8 +19,8 @@ dr <- 100
 data_resolution <- paste0(dr, "km2")
 
 # what climate layer should be used
-# clim <- "climate_pat_vocc_bio1.tif"
-clim <- "climate_comb.tif"
+clim <- "climate_pat_vocc_bio1.tif"
+# clim <- "climate_comb.tif"
 
 dir.create(file.path(here("manuscript", paste0("figures", "_", clim))), 
            showWarnings = FALSE)
@@ -73,7 +73,7 @@ plot(wdpa, add = TRUE, col = "#01665e", legend = FALSE)
 plot(countries$geometry, col = NA, lwd = 0.2, add = TRUE)
 
 legend("left", inset=.02, #title="Number of Cylinders",
-       c("Current protected areas", "Priority areas"), fill =  c("#01665e", "#8c510a"), cex = 2)
+       c("Current protected areas", "Priority areas"), fill =  c("#01665e", "#7b3294"), cex = 2)
 
 dev.off()
 # 
