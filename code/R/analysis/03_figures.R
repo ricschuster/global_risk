@@ -19,8 +19,8 @@ dr <- 100
 data_resolution <- paste0(dr, "km2")
 
 # what climate layer should be used
-clim <- "climate_pat_vocc_bio1.tif"
-# clim <- "climate_comb.tif"
+#clim <- "climate_pat_vocc_bio1.tif"
+clim <- "climate_comb.tif"
 
 dir.create(file.path(here("manuscript", paste0("figures", "_", clim))), 
            showWarnings = FALSE)
@@ -54,8 +54,8 @@ countries <- st_transform(countries, crs = proj4string(out_r))
 #################################################################################################
 # SLC map
 #################################################################################################
-here("manuscript", paste0("figures", "_", clim), paste0("Figure SLC", ".png")) %>%
-  png(width = 3600 * 4, height = 2000 * 4, res = 500)
+here("manuscript", paste0("figures", "_", clim), paste0("Figure SLC", ".tif")) %>%
+  tiff(width = 3600 * 4, height = 2000 * 4, res = 500)
 
 old.par <- par(mfrow=c(1,1))
 par(mar = c(0.1, 0.1, 0.1, 0.1), oma = c(0,3.5,1.5,0), bg = "white")
@@ -83,8 +83,8 @@ dev.off()
 #################################################################################################
 # F1
 #################################################################################################
-here("manuscript", paste0("figures", "_", clim), paste0("Figure 1", ".png")) %>%
-  png(width = 4000, height = 4000, res = 600)
+here("manuscript", paste0("figures", "_", clim), paste0("Figure 1", ".tif")) %>%
+  tiff(width = 4000, height = 4000, res = 600)
 
 old.par <- par(mfrow=c(4,4))
 par(mar = c(0.1, 0.1, 0.1, 0.1), oma = c(0,3.5,1.5,0), bg = "white")
@@ -142,8 +142,8 @@ dev.off()
 out_sum <- sum(out_r)
 values(out_sum)[values(out_sum) == 0] <-  NA
 
-here("manuscript", paste0("figures", "_", clim), paste0("Figure no regrets", ".png")) %>%
-  png(width = 3600 * 4, height = 2000 * 4, res = 500)
+here("manuscript", paste0("figures", "_", clim), paste0("Figure no regrets", ".tif")) %>%
+  tiff(width = 3600 * 4, height = 2000 * 4, res = 500)
 
 old.par <- par(mfrow=c(1,1))
 par(mar = c(0.1, 0.1, 0.1, 0.1), oma = c(0,3.5,1.5,0), bg = "white")
@@ -174,8 +174,8 @@ dev.off()
 out_sum <- sum(out_r)
 values(out_sum)[values(out_sum) == 0] <-  NA
 
-here("manuscript", paste0("figures", "_", clim), paste0("Figure 2", ".png")) %>%
-  png(width = 3600 * 4, height = 2000 * 4, res = 500)
+here("manuscript", paste0("figures", "_", clim), paste0("Figure 2", ".tif")) %>%
+  tiff(width = 3600 * 4, height = 2000 * 4, res = 500)
 
 par(mfrow=c(1, 1))
 
@@ -213,8 +213,8 @@ dev.off()
 #################################################################################################
 # F3
 #################################################################################################
-here("manuscript", paste0("figures", "_", clim), paste0("Figure 3", ".png")) %>%
-  png(width = 3600 * 4, height = 2000 * 4, res = 500)
+here("manuscript", paste0("figures", "_", clim), paste0("Figure 3", ".tif")) %>%
+  tiff(width = 3600 * 4, height = 2000 * 4, res = 500)
 
 par(mfrow=c(1, 1),
     mar = c(0, 0, 0, 0),
@@ -271,8 +271,8 @@ dev.off()
 wb_mean <- raster(here("data/intermediate/", data_resolution, "wb_mean.tif"))
 wb_mean <- (wb_mean + min(wb_mean[], na.rm=T)) * -1
 
-here("manuscript", paste0("figures", "_", clim), paste0("Figure S1. Governance", ".png")) %>%
-  png(width = 3600 * 4, height = 2000 * 4, res = 500)
+here("manuscript", paste0("figures", "_", clim), paste0("Figure S1. Governance", ".tif")) %>%
+  tiff(width = 3600 * 4, height = 2000 * 4, res = 500)
 
 par(mfrow=c(1, 1),
     mar = c(0, 0, 0, 0),
@@ -316,8 +316,8 @@ dev.off()
 lands <- raster(here("data/intermediate/", data_resolution, "kehoe_land_system.tif"))
 lands <- (lands - 100) * -1
 
-here("manuscript", paste0("figures", "_", clim), paste0("Figure S2. Lands", ".png")) %>%
-  png(width = 3600 * 4, height = 2000 * 4, res = 500)
+here("manuscript", paste0("figures", "_", clim), paste0("Figure S2. Lands", ".tif")) %>%
+  tiff(width = 3600 * 4, height = 2000 * 4, res = 500)
 
 par(mfrow=c(1, 1),
     mar = c(0, 0, 0, 0),
@@ -359,8 +359,8 @@ dev.off()
 climr <- raster(here("data/intermediate/", data_resolution, clim))
 climr <- (climr - min(climr[], na.rm = T)) + 0.01
 
-here("manuscript", paste0("figures", "_", clim), paste0("Figure S3. Climate", ".png")) %>%
-  png(width = 3600 * 4, height = 2000 * 4, res = 500)
+here("manuscript", paste0("figures", "_", clim), paste0("Figure S3. Climate", ".tif")) %>%
+  tiff(width = 3600 * 4, height = 2000 * 4, res = 500)
 
 par(mfrow=c(1, 1),
     mar = c(0, 0, 0, 0),
@@ -440,8 +440,8 @@ plt_rst[] <- ovlp$code
 
 my_col = c('#7a0177','#034e7b','#8c510a')
 
-here("manuscript", paste0("figures", "_", clim), paste0("Figure S4", ".png")) %>%
-  png(width = 3600 * 4, height = 2000 * 4, res = 500)
+here("manuscript", paste0("figures", "_", clim), paste0("Figure S4", ".tif")) %>%
+  tiff(width = 3600 * 4, height = 2000 * 4, res = 500)
 
 par(mfrow=c(1, 1),
     mar = c(0, 0, 0, 0),
@@ -512,8 +512,8 @@ icon_land <- readPNG(here("manuscript", paste0("figures", "_", clim), "icon_land
 icon_clim <- readPNG(here("manuscript", paste0("figures", "_", clim), "icon_clim.png"))
 
 
-here("manuscript", paste0("figures", "_", clim), paste0("Figure X. Zoom", ".png")) %>%
-  png(width = 3600 * 1, height = 4000 * 1/3, res = 500/3)
+here("manuscript", paste0("figures", "_", clim), paste0("Figure X. Zoom", ".tif")) %>%
+  tiff(width = 3600 * 1, height = 4000 * 1/3, res = 500/3)
 
 par(mfrow=c(2, 3),
     mar = c(0, 0, 0, 0),
